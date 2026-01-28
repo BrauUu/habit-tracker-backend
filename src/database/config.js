@@ -1,10 +1,10 @@
-import { Client } from "pg"
+import { Pool } from "pg"
 import fs from "node:fs"
 import 'dotenv/config'
 
 const env = process.env;
 
-const client = new Client({
+const pool = new Pool({
     user: env.PGUSER,
     password: env.PGPASSWORD,
     host: env.PGHOST,
@@ -14,10 +14,13 @@ const client = new Client({
         rejectUnauthorized: false,
         ca: fs.readFileSync('./certs/root.crt').toString(),
         key: fs.readFileSync('./certs/root.key').toString(),
-    
+
     },
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000
 })
 
-await client.connect()
 
-export default client
+
+export default pool

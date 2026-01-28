@@ -15,4 +15,4 @@ server.listen(PORT, () => {
     console.log(`running on http://localhost:${PORT}`);
 });
 
-server.use('/user', user);
+server.use(user);
