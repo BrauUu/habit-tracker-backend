@@ -17,10 +17,11 @@ async function login(req, res) {
         const { username, password } = req.body
         const user = await userService.login(username, password)
         const token = generateToken(user.id)
-        return res.status(200).json({ 'message': "login with success", user, token })
+        return res.status(200).json({ user, token })
     } catch (err) {
         console.log(err)
-        return res.status(err.status).json({ 'message': err.message })
+        if(err.message) return res.status(err.status).json({ 'message': err.message })
+        return res.sendStatus(err.status)
     }
 }
 
@@ -29,15 +30,42 @@ async function create(req, res) {
         const { username, password } = req.body
         const user = await userService.create(username, password)
         const token = generateToken(user.id)
-        return res.status(201).json({ 'message': "user created with success", user, token })
+        return res.status(201).json({ user, token })
     } catch (err) {
         console.log(err)
-        return res.status(err.status).json({ 'message': err.message })
+        if(err.message) return res.status(err.status).json({ 'message': err.message })
+        return res.sendStatus(err.status)
     }
 
 }
 
+async function getAllDataFromUser(req, res) {
+    try {
+        const userId = req.userId
+        const data = await userService.getAllDataFromUser(userId)
+        return res.status(200).json(data)
+    } catch (err) {
+        console.log(err)
+        if(err.message) return res.status(err.status).json({ 'message': err.message })
+        return res.sendStatus(err.status)
+    }
+}
+
+async function deleteUserByUserId(req, res) {
+    try {
+        const userId = req.userId
+        await userService.deleteUserByUserId(userId)
+        return res.sendStatus(200)
+    } catch (err) {
+        console.log(err)
+        if(err.message) return res.status(err.status).json({ 'message': err.message })
+        return res.sendStatus(err.status)
+    }
+}
+
 export {
     login,
-    create
+    create,
+    getAllDataFromUser,
+    deleteUserByUserId
 }

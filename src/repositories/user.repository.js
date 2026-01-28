@@ -17,3 +17,35 @@ export async function createUser(id, username, password) {
   );
   return res.rows[0];
 }
+
+export async function getDailiesByUserId(userId) {
+  const res = await pool.query(
+     "SELECT dailies.* FROM dailies INNER JOIN users on dailies.user_id = users.id WHERE users.id = $1",
+    [userId]
+  );
+  return res.rows;
+}
+
+export async function getTodosByUserId(userId) {
+  const res = await pool.query(
+     "SELECT todos.* FROM todos INNER JOIN users on todos.user_id = users.id WHERE users.id = $1",
+    [userId]
+  );
+  return res.rows;
+}
+
+export async function getIncrementalsByUserId(userId) {
+  const res = await pool.query(
+     "SELECT incrementals.* FROM incrementals INNER JOIN users on incrementals.user_id = users.id WHERE users.id = $1",
+    [userId]
+  );
+  return res.rows;
+}
+
+export async function deleteUser(userId) {
+  const res = await pool.query(
+     "DELETE FROM users WHERE users.id = $1",
+    [userId]
+  );
+  return res.rowCount;
+}
