@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import pool from "../database/config.js";
 
 export async function findByUsername(username) {
@@ -8,13 +9,15 @@ export async function findByUsername(username) {
     return res.rows[0];
 }
 
-export async function createUser(id, username, password) {
+export async function createUser(username, password) {
+  const id = randomUUID();
   const res = await pool.query(
     `INSERT INTO users (id, username, password)
      VALUES ($1, $2, $3)
-     RETURNING id`,
+     RETURNING *`,
     [id, username, password]
   );
+  console.log(res.rows)
   return res.rows[0];
 }
 

@@ -3,7 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import { rateLimit } from 'express-rate-limit'
 
-import user from './routes/user.js';
+import user from './routes/user.routes.js';
+import daily from './routes/daily.routes.js';
 
 const PORT = process.env.PORT;
 const server = express();
@@ -25,3 +26,4 @@ server.listen(PORT, () => {
 });
 
 server.use(user);
+server.use('/daily', daily);
