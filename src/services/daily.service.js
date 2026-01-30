@@ -45,3 +45,26 @@ export async function deleteDaily(dailyId, userId) {
     await dailyRepository.deleteDaily(dailyId)
     return 
 }
+
+export async function checkOrUncheckDailyById(dailyId, userId, check) {
+
+    const daily = await dailyRepository.findById(dailyId)
+    
+    if(!daily) 
+        throw new HttpError(404, 'Daily not found')
+
+    if (daily.user_id != userId)
+        throw new HttpError(401)
+
+    if(daily.done == check)
+        throw new HttpError(400)
+
+    const updatedDaily = await dailyRepository.checkOrUncheckDaily(dailyId, check)
+    if(!updatedDaily)
+        throw new HttpError(500)
+
+    console.log(updatedDaily)
+    const newStreak = parseInt(updatedDaily.streak) + (check ? 1 : -1)
+    await dailyRepository.updateStreak(dailyId, newStreak)
+    return
+}

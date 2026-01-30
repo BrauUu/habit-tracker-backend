@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { create, getDailyByDailyId, updateDailyByDailyId, deleteDailyByDailyId, checkDailyById, uncheckDailyById } from '../controllers/daily.controller.js';
+import { create, getDailyByDailyId, updateDailyByDailyId, deleteDailyByDailyId, checkOrUncheckDailyById } from '../controllers/daily.controller.js';
 import authMiddleware from './middlewares/auth.js';
 
 const router = Router();
@@ -9,12 +9,12 @@ router.post('/', async (req, res) => {
     await create(req, res)
 })
 
-router.post('/check', async (req, res) => {
-    await checkDailyById(req, res)
+router.post('/:dailyId/check', async (req, res) => {
+    await checkOrUncheckDailyById(req, res, true)
 })
 
-router.post('/uncheck', async (req, res) => {
-    await uncheckDailyById(req, res)
+router.post('/:dailyId/uncheck', async (req, res) => {
+    await checkOrUncheckDailyById(req, res, false)
 })
 
 router.get('/:dailyId', async (req, res) => {

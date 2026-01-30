@@ -39,3 +39,25 @@ export async function deleteDaily(dailyId) {
   );
   return res.rowCount;
 }
+
+export async function checkOrUncheckDaily(dailyId, check) {
+  const res = await pool.query(
+    `UPDATE dailies
+     SET done = $2
+     WHERE id = $1
+     RETURNING *`,
+    [dailyId, check]
+  );
+  return res.rows[0];
+}
+
+export async function updateStreak(dailyId, streak) {
+  const res = await pool.query(
+    `UPDATE dailies
+     SET streak = $1
+     WHERE id = $2
+     RETURNING *`,
+    [streak, dailyId]
+  );
+  return res.rowCount;
+}

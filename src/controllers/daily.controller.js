@@ -61,11 +61,17 @@ export async function updateDailyByDailyId(req, res) {
     }
 }
 
-//TODO: CHECK METHODS
-export async function checkDailyById(req, res) {
-   
-}
+export async function checkOrUncheckDailyById(req, res, check) {
+   try {
+        const { dailyId } = req.params
+        const userId = req.userId
 
-export async function uncheckDailyById(req, res) {
-   
+        await dailyService.checkOrUncheckDailyById(dailyId, userId, check)
+        return res.sendStatus(200)
+        
+    } catch (err) {
+        console.log(err)
+        if(err.message) return res.status(err.status).json({ 'message': err.message })
+        return res.sendStatus(err.status)
+    }
 }
