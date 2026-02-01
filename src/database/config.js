@@ -4,11 +4,11 @@ import 'dotenv/config'
 
 const env = process.env;
 
-const ssl = {
+const ssl = env.ENV === 'local' ? {
     rejectUnauthorized: false,
     ca: fs.readFileSync('./certs/root.crt').toString(),
     key: fs.readFileSync('./certs/root.key').toString(),
-}
+} : null
 
 console.log()
 
@@ -18,7 +18,7 @@ const pool = new Pool({
     host: env.PGHOST,
     port: env.PGPORT,
     database: env.PGDATABASE,
-    ssl: env.ENV === 'local' ? ssl : null,
+    ssl: ssl,
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000
