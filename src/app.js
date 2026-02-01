@@ -8,7 +8,7 @@ import daily from './routes/daily.routes.js';
 import incremental from './routes/incremental.routes.js'
 import todo from './routes/todo.routes.js'
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 4001;
 const server = express();
 
 const limiter = rateLimit({
