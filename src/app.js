@@ -5,6 +5,8 @@ import { rateLimit } from 'express-rate-limit'
 
 import user from './routes/user.routes.js';
 import daily from './routes/daily.routes.js';
+import incremental from './routes/incremental.routes.js'
+import todo from './routes/todo.routes.js'
 
 const PORT = process.env.PORT;
 const server = express();
@@ -27,3 +29,5 @@ server.listen(PORT, () => {
 
 server.use(user);
 server.use('/daily', daily);
+server.use('/incremental', incremental);
+server.use('/todo', todo);

@@ -63,7 +63,6 @@ export async function checkOrUncheckDailyById(dailyId, userId, check) {
     if(!updatedDaily)
         throw new HttpError(500)
 
-    console.log(updatedDaily)
     const newStreak = parseInt(updatedDaily.streak) + (check ? 1 : -1)
     await dailyRepository.updateStreak(dailyId, newStreak)
     return
