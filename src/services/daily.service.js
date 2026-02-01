@@ -6,6 +6,16 @@ export async function createDaily(userId, title, description, daysOfTheWeek) {
     return daily
 }
 
+export async function getPendingHabits(userId) {
+    const dailies = await dailyRepository.getPendingDailiesByUserId(userId)
+    return dailies
+}
+
+export async function undoAllDailies(userId) {
+    await dailyRepository.undoAllDailies(userId)
+    return
+}
+
 export async function getDaily(dailyId, userId) {
 
     const daily = await dailyRepository.findById(dailyId)

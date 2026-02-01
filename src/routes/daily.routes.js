@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { create, getDailyByDailyId, updateDailyByDailyId, deleteDailyByDailyId, checkOrUncheckDailyById } from '../controllers/daily.controller.js';
+import { create, getDailyByDailyId, updateDailyByDailyId, deleteDailyByDailyId, checkOrUncheckDailyById, getPendingHabits, undoAllDailies } from '../controllers/daily.controller.js';
 import authMiddleware from './middlewares/auth.js';
 
 const router = Router();
@@ -7,6 +7,14 @@ router.use('/', authMiddleware)
 
 router.post('/', async (req, res) => {
     await create(req, res)
+})
+
+router.get('/pendingHabits', async (req, res) => {
+    await getPendingHabits(req, res)
+})
+
+router.post('/newDay', async (req, res) => {
+    await undoAllDailies(req, res)
 })
 
 router.post('/:dailyId/check', async (req, res) => {
@@ -28,5 +36,6 @@ router.put('/:dailyId', async (req, res) => {
 router.delete('/:dailyId', async (req, res) => {
     await deleteDailyByDailyId(req, res)
 })
+
 
 export default router;

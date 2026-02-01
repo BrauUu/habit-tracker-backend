@@ -12,6 +12,28 @@ export async function createDaily(userId, title, description, daysOfTheWeek) {
   return res.rows[0];
 }
 
+export async function getPendingDailiesByUserId(userId) {
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1);
+
+  const res = await pool.query(
+     `SELECT dailies.* FROM dailies INNER JOIN users on dailies.user_id = users.id WHERE users.id = $1 and dailies.done = false and ${yesterday.getDay()} = any (dailies.days_of_the_week)`,
+    [userId]
+  );
+  return res.rows;
+}
+
+export async function undoAllDailies(userId) {
+  const res = await pool.query(
+    `UPDATE dailies
+     SET done = false
+     WHERE user_id = $1`,
+    [userId]
+  );
+  return res.rowCount;
+}
+
 export async function findById(dailyId) {
   const res = await pool.query(
     `SELECT * FROM dailies
