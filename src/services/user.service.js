@@ -30,12 +30,12 @@ export async function login(username, password) {
     
     const user = await userRepository.findByUsername(username)
     
-    if(!user) throw new HttpError(400, 'Incorrect "password" or "username"')
+    if(!user) throw new HttpError(400, "Incorrect 'password' or 'username'")
    
     const { password: hashedPassword, ...userWithoutPassword } = user
     const isPasswordCorrect = await compare(password, hashedPassword)
 
-    if(!isPasswordCorrect) throw new HttpError(400, 'Incorrect "password" or "username"')
+    if(!isPasswordCorrect) throw new HttpError(400, "Incorrect 'password' or 'username'")
     
     const token = generateToken(userWithoutPassword.id)
     

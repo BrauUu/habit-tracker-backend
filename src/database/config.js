@@ -3,8 +3,6 @@ import 'dotenv/config'
 
 const env = process.env;
 
-console.log()
-
 const pool = new Pool({
     user: env.PGUSER,
     password: env.PGPASSWORD,
@@ -16,9 +14,6 @@ const pool = new Pool({
     },
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000
 })
-
-
 
 export default pool

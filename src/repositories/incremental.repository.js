@@ -4,7 +4,7 @@ import pool from "../database/config.js";
 export async function createIncremental(userId, title, description, resetFrequency) {
   const id = randomUUID();
   const res = await pool.query(
-    `INSERT INTO incrementals (id, user_id, title, description, reset_frequency)
+    `INSERT INTO habit_tracker.incrementals (id, user_id, title, description, reset_frequency)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
     [id, userId, title, description, resetFrequency]
@@ -14,7 +14,7 @@ export async function createIncremental(userId, title, description, resetFrequen
 
 export async function findById(incrementalId) {
   const res = await pool.query(
-    `SELECT * FROM incrementals
+    `SELECT * FROM habit_tracker.incrementals
      WHERE id = $1`,
     [incrementalId]
   );
@@ -23,7 +23,7 @@ export async function findById(incrementalId) {
 
 export async function updateIncremental(incrementalId, title, description, resetFrequency) {
   const res = await pool.query(
-    `UPDATE incrementals
+    `UPDATE habit_tracker.incrementals
      SET title=$1, description=$2, reset_frequency=$3
      WHERE id = $4
      RETURNING *`,
@@ -34,7 +34,7 @@ export async function updateIncremental(incrementalId, title, description, reset
 
 export async function deleteIncremental(incrementalId) {
    const res = await pool.query(
-     "DELETE FROM incrementals WHERE id = $1",
+     "DELETE FROM habit_tracker.incrementals WHERE id = $1",
     [incrementalId]
   );
   return res.rowCount;
@@ -42,7 +42,7 @@ export async function deleteIncremental(incrementalId) {
 
 export async function updatePositiveCount(incrementalId, count) {
   const res = await pool.query(
-    `UPDATE incrementals
+    `UPDATE habit_tracker.incrementals
      SET positive_count = $1
      WHERE id = $2
      RETURNING *`,
@@ -53,7 +53,7 @@ export async function updatePositiveCount(incrementalId, count) {
 
 export async function updateNegativeCount(incrementalId, count) {
   const res = await pool.query(
-    `UPDATE incrementals
+    `UPDATE habit_tracker.incrementals
      SET negative_count = $1
      WHERE id = $2
      RETURNING *`,
