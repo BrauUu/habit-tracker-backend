@@ -17,6 +17,7 @@ const limiter = rateLimit({
 	standardHeaders: 'draft-8',
 	legacyHeaders: false, 
 	ipv6Subnet: 56,
+	validate: {xForwardedForHeader: false}
 })
 
 server.use(express.json());
