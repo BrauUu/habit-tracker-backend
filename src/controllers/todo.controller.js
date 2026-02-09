@@ -1,6 +1,7 @@
 import * as todoService from "../services/todo.service.js";
 import { isValidUUID, isValidDate } from "../utils/constants.js";
 
+//TODO: dueDate não deve ser obrigatório, deve ser null ou data válida - no create e no update
 export async function create(req, res) {
     try {
         const {title, description, dueDate} = req.body

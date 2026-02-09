@@ -55,5 +55,5 @@ export async function getAllDataFromUser(userId) {
         userRepository.getTodosByUserId(userId),
         userRepository.getIncrementalsByUserId(userId)
     ])
-    return {data : {dailies, todos, incrementals}}
+    return {dailies, todos, incrementals}
 }
