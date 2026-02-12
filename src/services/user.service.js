@@ -14,7 +14,7 @@ function generateToken(id) {
 
 export async function create(username, password) {
     
-    const exists = await userRepository.findByUsername(username)
+    const exists = await userRepository.getByUsername(username)
     
     if(exists) throw new HttpError(409, 'User already exists')
    
@@ -28,7 +28,7 @@ export async function create(username, password) {
 
 export async function login(username, password) {
     
-    const user = await userRepository.findByUsername(username)
+    const user = await userRepository.getByUsername(username)
     
     if(!user) throw new HttpError(400, "Incorrect 'password' or 'username'")
    
@@ -50,10 +50,11 @@ export async function deleteUserByUserId(userId) {
 }
 
 export async function getAllDataFromUser(userId) {
-    const [dailies, todos, incrementals] = await Promise.all([
+    const [dailies, todos, incrementals, user] = await Promise.all([
         userRepository.getDailiesByUserId(userId),
         userRepository.getTodosByUserId(userId),
-        userRepository.getIncrementalsByUserId(userId)
+        userRepository.getIncrementalsByUserId(userId),
+        userRepository.getById(userId)
     ])
-    return {dailies, todos, incrementals}
+    return {user, dailies, todos, incrementals}
 }

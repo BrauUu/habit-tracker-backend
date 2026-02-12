@@ -1,10 +1,18 @@
 import { randomUUID } from 'crypto'
 import pool from "../database/config.js";
 
-export async function findByUsername(username) {
+export async function getByUsername(username) {
     const res = await pool.query(
         "SELECT * FROM habit_tracker.users WHERE username = $1",
         [username]
+    );
+    return res.rows[0];
+}
+
+export async function getById(userId) {
+    const res = await pool.query(
+        "SELECT * FROM habit_tracker.users WHERE id = $1",
+        [userId]
     );
     return res.rows[0];
 }
@@ -17,7 +25,6 @@ export async function createUser(username, password) {
      RETURNING *`,
     [id, username, password]
   );
-  console.log(res.rows)
   return res.rows[0];
 }
 

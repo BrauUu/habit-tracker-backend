@@ -1,16 +1,15 @@
 import * as todoService from "../services/todo.service.js";
 import { isValidUUID, isValidDate } from "../utils/constants.js";
 
-//TODO: dueDate não deve ser obrigatório, deve ser null ou data válida - no create e no update
 export async function create(req, res) {
     try {
         const {title, description, dueDate} = req.body
         const userId = req.userId
 
-        if(!title || !dueDate)
-            return res.status(400).json({ message: "'title' and 'dueDate' required" })
+        if(!title )
+            return res.status(400).json({ message: "'title' required" })
         
-        if(!isValidDate(dueDate))
+        if(dueDate && !isValidDate(dueDate))
             return res.status(400).json({ message: "'dueDate' must be a valid date in YYYY-MM-DD format" })
 
         const todo = await todoService.createTodo(userId, title, description, dueDate)
@@ -63,10 +62,10 @@ export async function updateTodoById(req, res) {
         const { todoId } = req.params
         const userId = req.userId
 
-        if(!title || !dueDate) 
-            return res.status(400).json({ message: "'title' and 'dueDate' required" })
+        if(!title) 
+            return res.status(400).json({ message: "'title' required" })
         
-        if(!isValidDate(dueDate))
+        if(dueDate && !isValidDate(dueDate))
             return res.status(400).json({ message: "'dueDate' must be a valid date in YYYY-MM-DD format" })
         
         if(!isValidUUID(todoId))
