@@ -1,12 +1,13 @@
 import { randomUUID } from 'crypto'
 import pool from "../database/config.js";
 
+
 export async function createDaily(userId, title, description, daysOfTheWeek) {
   const id = randomUUID();
   const res = await pool.query(
     `INSERT INTO habit_tracker.dailies (id, user_id, title, description, days_of_the_week)
      VALUES ($1, $2, $3, $4, $5)
-     RETURNING *`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
     [id, userId, title, description, daysOfTheWeek]
   );
   return res.rows[0];
@@ -18,7 +19,7 @@ export async function getPendingDailiesByUserId(userId) {
   yesterday.setDate(today.getDate() - 1);
 
   const res = await pool.query(
-     `SELECT dailies.* FROM habit_tracker.dailies INNER JOIN habit_tracker.users on dailies.user_id = users.id WHERE users.id = $1 and dailies.done = false and ${yesterday.getDay()} = any (dailies.days_of_the_week)`,
+     `SELECT dailies.id, title, done, streak, description, days_of_the_week, user_id FROM habit_tracker.dailies INNER JOIN habit_tracker.users on dailies.user_id = users.id WHERE users.id = $1 and dailies.done = false and ${yesterday.getDay()} = any (dailies.days_of_the_week)`,
     [userId]
   );
   return res.rows;
@@ -36,7 +37,7 @@ export async function undoAllDailies(userId) {
 
 export async function findById(dailyId) {
   const res = await pool.query(
-    `SELECT * FROM habit_tracker.dailies
+    `SELECT dailies.id, title, done, streak, description, days_of_the_week, user_id FROM habit_tracker.dailies
      WHERE id = $1`,
     [dailyId]
   );
@@ -48,7 +49,7 @@ export async function updateDaily(dailyId, title, description, daysOfTheWeek) {
     `UPDATE habit_tracker.dailies
      SET title=$1, description=$2, days_of_the_week=$3
      WHERE id = $4
-     RETURNING *`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
     [title, description, daysOfTheWeek, dailyId]
   );
   return res.rows[0];
@@ -67,7 +68,7 @@ export async function checkOrUncheckDaily(dailyId, check) {
     `UPDATE habit_tracker.dailies
      SET done = $2
      WHERE id = $1
-     RETURNING *`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
     [dailyId, check]
   );
   return res.rows[0];
@@ -78,7 +79,7 @@ export async function updateStreak(dailyId, streak) {
     `UPDATE habit_tracker.dailies
      SET streak = $1
      WHERE id = $2
-     RETURNING *`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
     [streak, dailyId]
   );
   return res.rowCount;
