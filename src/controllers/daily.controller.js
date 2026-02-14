@@ -3,12 +3,12 @@ import { isValidUUID } from "../utils/constants.js";
 
 export async function create(req, res) {
     try {
-        const { title, description, daysOfTheWeek } = req.body
+        const { title, description, days_of_the_week } = req.body
         const userId = req.userId
         if (!title)
             return res.status(400).json({ message: "'title' required" })
 
-        const daily = await dailyService.createDaily(userId, title, description, daysOfTheWeek)
+        const daily = await dailyService.createDaily(userId, title, description, days_of_the_week)
         return res.status(201).json(daily)
 
     } catch (err) {
@@ -79,7 +79,7 @@ export async function deleteDailyByDailyId(req, res) {
 
 export async function updateDailyByDailyId(req, res) {
     try {
-        const { title, description, daysOfTheWeek } = req.body
+        const { title, description, days_of_the_week } = req.body
         const { dailyId } = req.params
         const userId = req.userId
 
@@ -88,7 +88,7 @@ export async function updateDailyByDailyId(req, res) {
         if (!isValidUUID(dailyId))
             return res.status(400).json({ message: "'dailyId' invalid" })
 
-        const daily = await dailyService.updateDaily(dailyId, userId, title, description, daysOfTheWeek)
+        const daily = await dailyService.updateDaily(dailyId, userId, title, description, days_of_the_week)
         return res.status(200).json(daily)
 
     } catch (err) {

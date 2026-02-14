@@ -3,14 +3,14 @@ import { isValidUUID, incrementalResetFrequencyTypes } from "../utils/constants.
 
 export async function create(req, res) {
     try {
-        const {title, description, resetFrequency} = req.body
+        const {title, description, reset_frequency} = req.body
         const userId = req.userId
-        const resetFrequencyNumeric = incrementalResetFrequencyTypes[resetFrequency];
+        const resetFrequencyNumeric = incrementalResetFrequencyTypes[reset_frequency];
 
-        if(!title || !resetFrequency)
-            return res.status(400).json({ message: "'title' and 'resetFrequency' required" })
+        if(!title || !reset_frequency)
+            return res.status(400).json({ message: "'title' and 'reset_frequency' required" })
         if(resetFrequencyNumeric === undefined)
-            return res.status(400).json({ message: `'resetFrequency' should be: ${Object.keys(incrementalResetFrequencyTypes).map(key=>`'${key}'`).join(' or ')}`})
+            return res.status(400).json({ message: `'reset_frequency' should be: ${Object.keys(incrementalResetFrequencyTypes).map(key=>`'${key}'`).join(' or ')}`})
 
         const incremental = await incrementalService.createIncremental(userId, title, description, resetFrequencyNumeric)
         return res.status(201).json(incremental)
@@ -58,15 +58,15 @@ export async function deleteIncrementalById(req, res) {
 
 export async function updateIncrementalById(req, res) {
     try {
-        const {title, description, resetFrequency} = req.body
+        const {title, description, reset_frequency} = req.body
         const { incrementalId } = req.params
         const userId = req.userId
-        const resetFrequencyNumeric = incrementalResetFrequencyTypes[resetFrequency];
+        const resetFrequencyNumeric = incrementalResetFrequencyTypes[reset_frequency];
 
-        if(!title || !resetFrequency) 
-            return res.status(400).json({ message: "'title' and 'resetFrequency' required" })
+        if(!title || !reset_frequency) 
+            return res.status(400).json({ message: "'title' and 'reset_frequency' required" })
         if(resetFrequencyNumeric === undefined)
-            return res.status(400).json({ message: `'resetFrequency' should be: ${Object.keys(incrementalResetFrequencyTypes).map(key=>`'${key}'`).join(' or ')}`})
+            return res.status(400).json({ message: `'reset_frequency' should be: ${Object.keys(incrementalResetFrequencyTypes).map(key=>`'${key}'`).join(' or ')}`})
         if(!isValidUUID(incrementalId))
             return res.status(400).json({ message: "'incrementalId' invalid" })
 

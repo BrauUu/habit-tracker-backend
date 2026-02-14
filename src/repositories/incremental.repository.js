@@ -61,4 +61,3 @@ export async function updateNegativeCount(incrementalId, count) {
   );
   return res.rowCount;
 }
-

@@ -3,7 +3,7 @@ import pool from "../database/config.js";
 
 export async function getByUsername(username) {
     const res = await pool.query(
-        "SELECT users.id, username, last_daily_reset_date, last_weekly_reset_date FROM habit_tracker.users WHERE username = $1",
+        "SELECT users.id, username, password, last_daily_reset_date, last_weekly_reset_date FROM habit_tracker.users WHERE username = $1",
         [username]
     );
     return res.rows[0];
