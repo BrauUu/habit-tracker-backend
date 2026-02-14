@@ -1,6 +1,6 @@
 
 import * as userService from "../services/user.service.js";
-import { passwordRegex } from "../utils/constants.js";
+import { passwordRegex, formatResetFrequency } from "../utils/constants.js";
 
 export async function login(req, res) {
     try {
@@ -39,6 +39,9 @@ export async function getAllDataFromUser(req, res) {
     try {
         const userId = req.userId
         const data = await userService.getAllDataFromUser(userId)
+
+        data.incrementals = data.incrementals.map((incremental) => formatResetFrequency(incremental))
+
         return res.status(200).json(data)
     } catch (err) {
         console.log(err)

@@ -14,3 +14,10 @@ export function isValidDate(dateString) {
     const date = new Date(dateString);
     return date instanceof Date && !isNaN(date) && dateString === date.toISOString().split('T')[0];
 }
+
+export function formatResetFrequency(incremental) {
+    const resetFrequencyText = Object.keys(incrementalResetFrequencyTypes).find((key) =>
+        incrementalResetFrequencyTypes[key] === incremental.reset_frequency
+    )
+    return { ...incremental, reset_frequency: resetFrequencyText }
+}

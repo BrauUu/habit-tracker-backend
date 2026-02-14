@@ -1,5 +1,6 @@
 import * as incrementalService from "../services/incremental.service.js";
-import { isValidUUID, incrementalResetFrequencyTypes } from "../utils/constants.js";
+import { isValidUUID, incrementalResetFrequencyTypes, formatResetFrequency } from "../utils/constants.js";
+
 
 export async function create(req, res) {
     try {
@@ -13,7 +14,7 @@ export async function create(req, res) {
             return res.status(400).json({ message: `'reset_frequency' should be: ${Object.keys(incrementalResetFrequencyTypes).map(key=>`'${key}'`).join(' or ')}`})
 
         const incremental = await incrementalService.createIncremental(userId, title, description, resetFrequencyNumeric)
-        return res.status(201).json(incremental)
+        return res.status(201).json(formatResetFrequency(incremental))
         
     } catch (err) {
         console.log(err)
@@ -30,7 +31,7 @@ export async function getIncrementalById(req, res) {
             return res.status(400).json({ message: "'incrementalId' invalid" })
 
         const incremental = await incrementalService.getIncremental(incrementalId, userId)
-        return res.status(200).json(incremental)
+        return res.status(200).json(formatResetFrequency(incremental))
         
     } catch (err) {
         console.log(err)
@@ -71,7 +72,7 @@ export async function updateIncrementalById(req, res) {
             return res.status(400).json({ message: "'incrementalId' invalid" })
 
         const incremental = await incrementalService.updateIncremental(incrementalId, userId, title, description, resetFrequencyNumeric)
-        return res.status(200).json(incremental)
+        return res.status(200).json(formatResetFrequency(incremental))
         
     } catch (err) {
         console.log(err)
