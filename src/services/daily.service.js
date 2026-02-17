@@ -11,11 +11,6 @@ export async function getPendingHabits(userId) {
     return dailies
 }
 
-export async function undoAllDailies(userId) {
-    await dailyRepository.undoAllDailies(userId)
-    return
-}
-
 export async function getDaily(dailyId, userId) {
 
     const daily = await dailyRepository.findById(dailyId)

@@ -61,3 +61,27 @@ export async function updateNegativeCount(incrementalId, count) {
   );
   return res.rowCount;
 }
+
+export async function resetIncrementals(userId) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0);
+
+  const todayDayOfWeek = today.getDay()
+
+  const res = await pool.query(
+    `UPDATE habit_tracker.incrementals
+     SET positive_count = 0, negative_count = 0
+     WHERE user_id = $1 AND (reset_frequency = $2 OR reset_frequency = 0)
+     RETURNING incrementals.id, positive_count, negative_count`,
+    [userId, todayDayOfWeek]
+  );
+  return res.rows;
+}
+
+export async function getIncrementalsByUserId(userId) {
+  const res = await pool.query(
+    "SELECT incrementals.id, title, reset_frequency, positive_count, negative_count, description, user_id FROM habit_tracker.incrementals INNER JOIN habit_tracker.users on incrementals.user_id = users.id WHERE users.id = $1",
+    [userId]
+  );
+  return res.rows;
+}

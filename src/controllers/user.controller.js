@@ -35,6 +35,19 @@ export async function create(req, res) {
 
 }
 
+export async function startNewDay(req, res) {
+    try {
+        const userId = req.userId
+        const data = await userService.startNewDay(userId)
+        return res.status(200).json(data)
+
+    } catch (err) {
+        console.log(err)
+        if (err.message) return res.status(err.status).json({ message: err.message })
+        return res.sendStatus(err.status)
+    }
+}
+
 export async function getAllDataFromUser(req, res) {
     try {
         const userId = req.userId

@@ -15,7 +15,7 @@ export async function createTodo(userId, title, description, dueDate) {
 export async function findById(todoId) {
   const res = await pool.query(
     `SELECT todos.id, title, done_date, due_date, description, user_id FROM habit_tracker.todos
-     WHERE id = $1`,
+     WHERE todos.id = $1`,
     [todoId]
   );
   return res.rows[0];
@@ -25,7 +25,7 @@ export async function updateTodo(todoId, title, description, dueDate) {
   const res = await pool.query(
     `UPDATE habit_tracker.todos
      SET title=$1, description=$2, due_date=$3
-     WHERE id = $4
+     WHERE todos.id = $4
      RETURNING todos.id, title, done_date, due_date, description, user_id`,
     [title, description, dueDate, todoId]
   );
@@ -33,8 +33,8 @@ export async function updateTodo(todoId, title, description, dueDate) {
 }
 
 export async function deleteTodo(todoId) {
-   const res = await pool.query(
-     "DELETE FROM habit_tracker.todos WHERE id = $1",
+  const res = await pool.query(
+    "DELETE FROM habit_tracker.todos WHERE todos.id = $1",
     [todoId]
   );
   return res.rowCount;
@@ -44,9 +44,33 @@ export async function updateDoneDate(todoId, doneDate) {
   const res = await pool.query(
     `UPDATE habit_tracker.todos
      SET done_date = $1
-     WHERE id = $2
+     WHERE todos.id = $2
      RETURNING todos.id, title, done_date, due_date, description, user_id`,
     [doneDate, todoId]
   );
   return res.rowCount;
+}
+
+export async function deleteTodosOlderThan7Days(userId) {
+
+  const today = new Date()
+  const doneDate = new Date()
+  doneDate.setDate(today.getDate() - 7)
+  doneDate.setHours(0, 0, 0, 0);
+
+  const res = await pool.query(
+    `DELETE FROM habit_tracker.todos 
+     WHERE todos.id = $1 and done_date <= $2
+     RETURNING todos.id`,
+    [userId, doneDate]
+  );
+  return res.rows;
+}
+
+export async function getTodosByUserId(userId) {
+  const res = await pool.query(
+    "SELECT todos.id, title, done_date, due_date, description, user_id FROM habit_tracker.todos INNER JOIN habit_tracker.users on todos.user_id = users.id WHERE users.id = $1",
+    [userId]
+  );
+  return res.rows;
 }

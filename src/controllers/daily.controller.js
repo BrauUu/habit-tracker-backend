@@ -47,19 +47,6 @@ export async function getDailyByDailyId(req, res) {
     }
 }
 
-export async function undoAllDailies(req, res) {
-    try {
-        const userId = req.userId
-        await dailyService.undoAllDailies(userId)
-        return res.sendStatus(200)
-
-    } catch (err) {
-        console.log(err)
-        if (err.message) return res.status(err.status).json({ message: err.message })
-        return res.sendStatus(err.status)
-    }
-}
-
 export async function deleteDailyByDailyId(req, res) {
     try {
         const { dailyId } = req.params

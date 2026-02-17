@@ -3,6 +3,10 @@ import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 
 import * as userRepository from '../repositories/user.repository.js'
+import * as todoRepository from '../repositories/todo.repository.js'
+import * as incrementalRepository from '../repositories/incremental.repository.js'
+import * as dailyRepository from '../repositories/daily.repository.js'
+
 import HttpError from '../errors/HttpError.js'
 
 function generateToken(id) {
@@ -43,6 +47,25 @@ export async function login(username, password) {
 
 }
 
+export async function startNewDay(userId) {
+
+    const [yesterdayDailies, incrementalsUpdates, deletedTodos] = await Promise.all([
+        dailyRepository.getYesterdayDailies(userId),
+        incrementalRepository.resetIncrementals(userId),
+        todoRepository.deleteTodosOlderThan7Days(userId)
+    ])
+
+    const dailiesUpdates = await Promise.all(yesterdayDailies.map(async (daily) => {
+        if(daily.done) {
+            return await dailyRepository.updateDailyDoneAndStreak(daily.id, daily.streak)
+        } else {
+            return await dailyRepository.updateDailyDoneAndStreak(daily.id, 0)
+        }
+    }))
+
+    return {dailiesUpdates, incrementalsUpdates, deletedTodos}
+}
+
 export async function deleteUserByUserId(userId) {
     const isDeleted = await userRepository.deleteUser(userId)
     if(!isDeleted) throw new HttpError(404)
@@ -51,9 +74,9 @@ export async function deleteUserByUserId(userId) {
 
 export async function getAllDataFromUser(userId) {
     const [dailies, todos, incrementals, user] = await Promise.all([
-        userRepository.getDailiesByUserId(userId),
-        userRepository.getTodosByUserId(userId),
-        userRepository.getIncrementalsByUserId(userId),
+        dailyRepository.getDailiesByUserId(userId),
+        todoRepository.getTodosByUserId(userId),
+        incrementalRepository.getIncrementalsByUserId(userId),
         userRepository.getById(userId)
     ])
     return {user, dailies, todos, incrementals}
