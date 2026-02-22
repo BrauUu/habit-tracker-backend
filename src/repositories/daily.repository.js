@@ -110,3 +110,31 @@ export async function getDailiesByUserId(userId) {
   );
   return res.rows;
 }
+
+export async function bulkCreateDailies(userId, dailies, client) {
+  if (dailies.length === 0) return [];
+
+  const values = dailies.map((_, index) => {
+    const offset = index * 7;
+    return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7})`;
+  }).join(', ');
+  
+  const params = dailies.flatMap(daily => [
+    randomUUID(),
+    userId,
+    daily.title,
+    daily.done,
+    daily.streak,
+    daily.description || null,
+    daily.days_of_the_week
+  ]);
+  
+  const query = `
+    INSERT INTO habit_tracker.dailies (id, user_id, title, done, streak, description, days_of_the_week)
+    VALUES ${values}
+    RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id
+  `;
+  
+  const res = await client.query(query, params);
+  return res.rows;
+}

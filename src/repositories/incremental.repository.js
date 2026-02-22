@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import pool from "../database/config.js";
+import {formatResetFrequencyEnum} from '../utils/constants.js'
 
 export async function createIncremental(userId, title, description, resetFrequency) {
   const id = randomUUID();
@@ -83,5 +84,33 @@ export async function getIncrementalsByUserId(userId) {
     "SELECT incrementals.id, title, reset_frequency, positive_count, negative_count, description, user_id FROM habit_tracker.incrementals INNER JOIN habit_tracker.users on incrementals.user_id = users.id WHERE users.id = $1",
     [userId]
   );
+  return res.rows;
+}
+
+export async function bulkCreateIncrementals(userId, incrementals, client) {
+  if (incrementals.length === 0) return [];
+  
+  const values = incrementals.map((_, index) => {
+    const offset = index * 7;
+    return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7})`;
+  }).join(', ');
+  
+  const params = incrementals.flatMap(incremental => [
+    randomUUID(),
+    userId,
+    incremental.title,
+    incremental.positive_count, 
+    incremental.negative_count,
+    incremental.description || null,
+    formatResetFrequencyEnum(incremental).reset_frequency
+  ]);
+  
+  const query = `
+    INSERT INTO habit_tracker.incrementals (id, user_id, title, positive_count, negative_count, description, reset_frequency)
+    VALUES ${values}
+    RETURNING incrementals.id, title, reset_frequency, positive_count, negative_count, description, user_id
+  `;
+  
+  const res = await client.query(query, params);
   return res.rows;
 }

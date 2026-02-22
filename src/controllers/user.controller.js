@@ -1,6 +1,6 @@
 
 import * as userService from "../services/user.service.js";
-import { passwordRegex, formatResetFrequency } from "../utils/constants.js";
+import { passwordRegex, formatResetFrequencyText } from "../utils/constants.js";
 
 export async function login(req, res) {
     try {
@@ -48,12 +48,26 @@ export async function startNewDay(req, res) {
     }
 }
 
+export async function synchronizeHabits(req, res) {
+    try {
+        const userId = req.userId
+        const habits = req.body
+        const data = await userService.synchronizeHabits(userId, habits)
+        return res.status(201).json(data)
+
+    } catch (err) {
+        console.log(err)
+        if (err.message) return res.status(err.status).json({ message: err.message })
+        return res.sendStatus(err.status)
+    }
+}
+
 export async function getAllDataFromUser(req, res) {
     try {
         const userId = req.userId
         const data = await userService.getAllDataFromUser(userId)
 
-        data.incrementals = data.incrementals.map((incremental) => formatResetFrequency(incremental))
+        data.incrementals = data.incrementals.map((incremental) => formatResetFrequencyText(incremental))
 
         return res.status(200).json(data)
     } catch (err) {

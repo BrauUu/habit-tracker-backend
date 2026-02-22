@@ -74,3 +74,30 @@ export async function getTodosByUserId(userId) {
   );
   return res.rows;
 }
+
+export async function bulkCreateTodos(userId, todos, client ) {
+  if (todos.length === 0) return [];
+  
+  const values = todos.map((_, index) => {
+    const offset = index * 6;
+    return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6})`;
+  }).join(', ');
+  
+  const params = todos.flatMap(todo => [
+    randomUUID(),
+    userId,
+    todo.title,
+    todo.description || null,
+    todo.due_date || null,
+    todo.done_date || null
+  ]);
+  
+  const query = `
+    INSERT INTO habit_tracker.todos (id, user_id, title, description, due_date, done_date)
+    VALUES ${values}
+    RETURNING id, title, done_date, due_date, description, user_id
+  `;
+  
+  const res = await client.query(query, params);
+  return res.rows;
+}

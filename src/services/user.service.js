@@ -6,6 +6,7 @@ import * as userRepository from '../repositories/user.repository.js'
 import * as todoRepository from '../repositories/todo.repository.js'
 import * as incrementalRepository from '../repositories/incremental.repository.js'
 import * as dailyRepository from '../repositories/daily.repository.js'
+import pool from '../database/config.js'
 
 import HttpError from '../errors/HttpError.js'
 
@@ -14,6 +15,36 @@ function generateToken(id) {
         expiresIn: '3d'
     })
     return token;
+}
+
+export async function synchronizeHabits(userId, habits) {
+    const { dailyHabits, todos, incrementalHabits} = habits;
+    
+    const client = await pool.connect();
+    
+    try {
+        await client.query('BEGIN');
+        
+        const [createdDailies, createdTodos, createdIncrementals] = await Promise.all([
+            dailyRepository.bulkCreateDailies(userId, dailyHabits, client),
+            todoRepository.bulkCreateTodos(userId, todos, client),
+            incrementalRepository.bulkCreateIncrementals(userId, incrementalHabits, client)
+        ]);
+        
+        await client.query('COMMIT');
+        
+        return {
+            dailies: createdDailies,
+            todos: createdTodos,
+            incrementals: createdIncrementals
+        };
+        
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
 }
 
 export async function create(username, password) {
