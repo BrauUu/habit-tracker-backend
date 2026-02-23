@@ -83,7 +83,8 @@ export async function startNewDay(userId) {
     const [yesterdayDailies, incrementalsUpdates, deletedTodos] = await Promise.all([
         dailyRepository.getYesterdayDailies(userId),
         incrementalRepository.resetIncrementals(userId),
-        todoRepository.deleteTodosOlderThan7Days(userId)
+        todoRepository.deleteTodosOlderThan7Days(userId),
+        userRepository.updateLastDailyResetDate(userId)
     ])
 
     const dailiesUpdates = await Promise.all(yesterdayDailies.map(async (daily) => {

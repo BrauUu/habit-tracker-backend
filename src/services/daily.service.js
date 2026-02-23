@@ -8,7 +8,8 @@ export async function createDaily(userId, title, description, daysOfTheWeek) {
 
 export async function getPendingHabits(userId) {
     const dailies = await dailyRepository.getPendingDailiesByUserId(userId)
-    return dailies
+    const ids = dailies.map(daily => daily.id)
+    return ids
 }
 
 export async function getDaily(dailyId, userId) {
