@@ -18,27 +18,27 @@ function generateToken(id) {
 }
 
 export async function synchronizeHabits(userId, habits) {
-    const { dailyHabits, todos, incrementalHabits} = habits;
-    
+    const { dailyHabits, todos, incrementalHabits } = habits;
+
     const client = await pool.connect();
-    
+
     try {
         await client.query('BEGIN');
-        
+
         const [createdDailies, createdTodos, createdIncrementals] = await Promise.all([
             dailyRepository.bulkCreateDailies(userId, dailyHabits, client),
             todoRepository.bulkCreateTodos(userId, todos, client),
             incrementalRepository.bulkCreateIncrementals(userId, incrementalHabits, client)
         ]);
-        
+
         await client.query('COMMIT');
-        
+
         return {
             dailies: createdDailies,
             todos: createdTodos,
             incrementals: createdIncrementals
         };
-        
+
     } catch (error) {
         await client.query('ROLLBACK');
         throw error;
@@ -48,59 +48,68 @@ export async function synchronizeHabits(userId, habits) {
 }
 
 export async function create(username, password) {
-    
+
     const exists = await userRepository.getByUsername(username)
-    
-    if(exists) throw new HttpError(409, 'User already exists')
-   
+
+    if (exists) throw new HttpError(409, 'User already exists')
+
     const hashedPassword = await hash(password, 10);
     const { password: _, ...userWithoutPassword } = await userRepository.createUser(username, hashedPassword)
     const token = generateToken(userWithoutPassword.id)
-        
+
     return { user: userWithoutPassword, token }
 
 }
 
 export async function login(username, password) {
-    
+
     const user = await userRepository.getByUsername(username)
-    
-    if(!user) throw new HttpError(400, "Incorrect 'password' or 'username'")
-   
+
+    if (!user) throw new HttpError(400, "Incorrect 'password' or 'username'")
+
     const { password: hashedPassword, ...userWithoutPassword } = user
     const isPasswordCorrect = await compare(password, hashedPassword)
 
-    if(!isPasswordCorrect) throw new HttpError(400, "Incorrect 'password' or 'username'")
-    
+    if (!isPasswordCorrect) throw new HttpError(400, "Incorrect 'password' or 'username'")
+
     const token = generateToken(userWithoutPassword.id)
-    
+
     return { user: userWithoutPassword, token }
 
 }
 
 export async function startNewDay(userId) {
 
-    const [yesterdayDailies, incrementalsUpdates, deletedTodos] = await Promise.all([
-        dailyRepository.getYesterdayDailies(userId),
+    const [dailies, incrementalsUpdates, deletedTodos, user] = await Promise.all([
+        dailyRepository.getDailiesByUserId(userId),
         incrementalRepository.resetIncrementals(userId),
         todoRepository.deleteTodosOlderThan7Days(userId),
         userRepository.updateLastDailyResetDate(userId)
     ])
 
-    const dailiesUpdates = await Promise.all(yesterdayDailies.map(async (daily) => {
-        if(daily.done) {
+    const today = new Date()
+    const yesterday = new Date(today)
+    yesterday.setDate(today.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+
+    const yesterdayDayOfWeek = yesterday.getDay()
+
+    const dailiesUpdates = await Promise.all(dailies.map(async (daily) => {
+        if (daily.done || !daily.days_of_the_week.includes(yesterdayDayOfWeek)) {
             return await dailyRepository.updateDailyDoneAndStreak(daily.id, daily.streak)
         } else {
             return await dailyRepository.updateDailyDoneAndStreak(daily.id, 0)
         }
     }))
 
-    return {dailiesUpdates, incrementalsUpdates, deletedTodos}
+    const last_daily_reset_date = new Date(user.last_daily_reset_date)
+
+    return { dailiesUpdates, incrementalsUpdates, deletedTodos, last_daily_reset_date}
 }
 
 export async function deleteUserByUserId(userId) {
     const isDeleted = await userRepository.deleteUser(userId)
-    if(!isDeleted) throw new HttpError(404)
+    if (!isDeleted) throw new HttpError(404)
     return
 }
 
@@ -111,5 +120,5 @@ export async function getAllDataFromUser(userId) {
         incrementalRepository.getIncrementalsByUserId(userId),
         userRepository.getById(userId)
     ])
-    return {user, dailies, todos, incrementals}
+    return { user, dailies, todos, incrementals }
 }

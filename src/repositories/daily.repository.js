@@ -75,23 +75,6 @@ export async function updateStreak(dailyId, streak) {
   return res.rowCount;
 }
 
-export async function getYesterdayDailies(userId) {
-
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(today.getDate() - 1);
-  yesterday.setHours(0, 0, 0, 0);
-
-  const yesterdayDayOfWeek = yesterday.getDay()
-
-  const res = await pool.query(
-    `SELECT dailies.id, done, streak, days_of_the_week FROM habit_tracker.dailies
-     WHERE $1 = any(days_of_the_week) and user_id = $2`,
-    [yesterdayDayOfWeek, userId]
-  );
-  return res.rows;
-}
-
 export async function updateDailyDoneAndStreak(dailyId, streak) {
   const res = await pool.query(
     `UPDATE habit_tracker.dailies

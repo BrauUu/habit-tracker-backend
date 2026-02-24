@@ -5,14 +5,14 @@ import { passwordRegex, formatResetFrequencyText } from "../utils/constants.js";
 export async function login(req, res) {
     try {
         const { username, password } = req.body
-        if(!username || !password) {
+        if (!username || !password) {
             return res.status(400).json({ message: "'username' and 'password' required" })
         }
         const { user, token } = await userService.login(username, password)
         return res.status(200).json({ user, token })
     } catch (err) {
         console.log(err)
-        if(err.message) return res.status(err.status).json({ message: err.message })
+        if (err.message) return res.status(err.status).json({ message: err.message })
         return res.sendStatus(err.status)
     }
 }
@@ -20,16 +20,19 @@ export async function login(req, res) {
 export async function create(req, res) {
     try {
         const { username, password } = req.body
-        if(!username || !password)
+        if (!username || !password)
             return res.status(400).json({ message: "'username' and 'password' required" })
-        if(!passwordRegex.test(password)){
+        if (username.length > 50) {
+            return res.status(400).json({ message: "'username' must be no longer than 50 characters" })
+        }
+        if (!passwordRegex.test(password)) {
             return res.status(400).json({ message: "'password' must contain at least: 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1 symbol (!@#$%&*?)" })
         }
         const { user, token } = await userService.create(username, password)
         return res.status(201).json({ user, token })
     } catch (err) {
         console.log(err)
-        if(err.message) return res.status(err.status).json({ message: err.message })
+        if (err.message) return res.status(err.status).json({ message: err.message })
         return res.sendStatus(err.status)
     }
 
@@ -72,7 +75,7 @@ export async function getAllDataFromUser(req, res) {
         return res.status(200).json(data)
     } catch (err) {
         console.log(err)
-        if(err.message) return res.status(err.status).json({ message: err.message })
+        if (err.message) return res.status(err.status).json({ message: err.message })
         return res.sendStatus(err.status)
     }
 }
@@ -84,7 +87,7 @@ export async function deleteUserByUserId(req, res) {
         return res.sendStatus(200)
     } catch (err) {
         console.log(err)
-        if(err.message) return res.status(err.status).json({ message: err.message })
+        if (err.message) return res.status(err.status).json({ message: err.message })
         return res.sendStatus(err.status)
     }
 }
