@@ -25,7 +25,7 @@ export async function createUser(username, password) {
 
   const res = await pool.query(
     `INSERT INTO habit_tracker.users (id, username, password, last_daily_reset_date)
-     VALUES ($1, $2, $3, $4, $4)
+     VALUES ($1, $2, $3, $4)
      RETURNING users.id, username, last_daily_reset_date`,
     [id, username, password, now]
   );
