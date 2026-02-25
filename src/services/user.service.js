@@ -95,16 +95,16 @@ export async function startNewDay(userId) {
     const yesterdayDayOfWeek = yesterday.getDay()
 
     const dailiesUpdates = await Promise.all(dailies.map(async (daily) => {
-        if (daily.done || !daily.days_of_the_week.includes(yesterdayDayOfWeek)) {
+        if (daily.done || !daily.daysOfTheWeek.includes(yesterdayDayOfWeek)) {
             return await dailyRepository.updateDailyDoneAndStreak(daily.id, daily.streak)
         } else {
             return await dailyRepository.updateDailyDoneAndStreak(daily.id, 0)
         }
     }))
 
-    const last_daily_reset_date = new Date(user.last_daily_reset_date)
+    const lastDailyResetDate = new Date(user.lastDailyResetDate)
 
-    return { dailiesUpdates, incrementalsUpdates, deletedTodos, last_daily_reset_date}
+    return { dailiesUpdates, incrementalsUpdates, deletedTodos, lastDailyResetDate}
 }
 
 export async function deleteUserByUserId(userId) {

@@ -7,7 +7,7 @@ export async function createDaily(userId, title, description, daysOfTheWeek) {
   const res = await pool.query(
     `INSERT INTO habit_tracker.dailies (id, user_id, title, description, days_of_the_week)
      VALUES ($1, $2, $3, $4, $5)
-     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId"`,
     [id, userId, title, description, daysOfTheWeek]
   );
   return res.rows[0];
@@ -27,7 +27,7 @@ export async function getPendingDailiesByUserId(userId) {
 
 export async function findById(dailyId) {
   const res = await pool.query(
-    `SELECT dailies.id, title, done, streak, description, days_of_the_week, user_id FROM habit_tracker.dailies
+    `SELECT dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId" FROM habit_tracker.dailies
      WHERE id = $1`,
     [dailyId]
   );
@@ -39,7 +39,7 @@ export async function updateDaily(dailyId, title, description, daysOfTheWeek) {
     `UPDATE habit_tracker.dailies
      SET title=$1, description=$2, days_of_the_week=$3
      WHERE id = $4
-     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId"`,
     [title, description, daysOfTheWeek, dailyId]
   );
   return res.rows[0];
@@ -58,7 +58,7 @@ export async function checkOrUncheckDaily(dailyId, check) {
     `UPDATE habit_tracker.dailies
      SET done = $2
      WHERE id = $1
-     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId"`,
     [dailyId, check]
   );
   return res.rows[0];
@@ -69,7 +69,7 @@ export async function updateStreak(dailyId, streak) {
     `UPDATE habit_tracker.dailies
      SET streak = $1
      WHERE id = $2
-     RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id`,
+     RETURNING dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId"`,
     [streak, dailyId]
   );
   return res.rowCount;
@@ -88,7 +88,9 @@ export async function updateDailyDoneAndStreak(dailyId, streak) {
 
 export async function getDailiesByUserId(userId) {
   const res = await pool.query(
-    "SELECT dailies.id, title, done, streak, description, days_of_the_week, user_id FROM habit_tracker.dailies INNER JOIN habit_tracker.users on dailies.user_id = users.id WHERE users.id = $1",
+    `SELECT dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId" FROM habit_tracker.dailies 
+    INNER JOIN habit_tracker.users on dailies.user_id = users.id 
+    WHERE users.id = $1`,
     [userId]
   );
   return res.rows;
@@ -109,13 +111,13 @@ export async function bulkCreateDailies(userId, dailies, client) {
     daily.done,
     daily.streak,
     daily.description || null,
-    daily.days_of_the_week
+    daily.daysOfTheWeek
   ]);
   
   const query = `
     INSERT INTO habit_tracker.dailies (id, user_id, title, done, streak, description, days_of_the_week)
     VALUES ${values}
-    RETURNING dailies.id, title, done, streak, description, days_of_the_week, user_id
+    RETURNING dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId"
   `;
   
   const res = await client.query(query, params);

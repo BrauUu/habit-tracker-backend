@@ -12,7 +12,7 @@ export async function getTodo(todoId, userId) {
 
     if(!todo) 
         throw new HttpError(404, 'Todo not found')
-    if (todo.user_id != userId)
+    if (todo.userId != userId)
         throw new HttpError(401)
 
     return todo
@@ -25,7 +25,7 @@ export async function updateTodo(todoId, userId, title, description, dueDate) {
     if(!todo) 
         throw new HttpError(404, 'Todo not found')
 
-    if (todo.user_id != userId)
+    if (todo.userId != userId)
         throw new HttpError(401)
 
     const updatedTodo = await todoRepository.updateTodo(todoId, title, description, dueDate)
@@ -39,7 +39,7 @@ export async function deleteTodo(todoId, userId) {
     if(!todo) 
         throw new HttpError(404, 'Todo not found')
 
-    if (todo.user_id != userId)
+    if (todo.userId != userId)
         throw new HttpError(401)
 
     await todoRepository.deleteTodo(todoId)
@@ -53,10 +53,10 @@ export async function checkOrUncheckTodoById(todoId, userId, check) {
     if(!todo) 
         throw new HttpError(404, 'Todo not found')
 
-    if (todo.user_id != userId)
+    if (todo.userId != userId)
         throw new HttpError(401)
 
-    if((todo.done_date !== null && check) || (todo.done_date === null && !check))
+    if((todo.doneDate !== null && check) || (todo.doneDate === null && !check))
         throw new HttpError(400)
 
     if(check) {

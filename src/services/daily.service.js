@@ -18,7 +18,7 @@ export async function getDaily(dailyId, userId) {
 
     if(!daily) 
         throw new HttpError(404, 'Daily not found')
-    if (daily.user_id != userId)
+    if (daily.userId != userId)
         throw new HttpError(401)
 
     return daily
@@ -31,7 +31,7 @@ export async function updateDaily(dailyId, userId, title, description, daysOfThe
     if(!daily) 
         throw new HttpError(404, 'Daily not found')
 
-    if (daily.user_id != userId)
+    if (daily.userId != userId)
         throw new HttpError(401)
 
     const updatedDaily = await dailyRepository.updateDaily(dailyId, title, description, daysOfTheWeek)
@@ -45,7 +45,7 @@ export async function deleteDaily(dailyId, userId) {
     if(!daily) 
         throw new HttpError(404, 'Daily not found')
 
-    if (daily.user_id != userId)
+    if (daily.userId != userId)
         throw new HttpError(401)
 
     await dailyRepository.deleteDaily(dailyId)
@@ -59,7 +59,7 @@ export async function checkOrUncheckDailyById(dailyId, userId, check) {
     if(!daily) 
         throw new HttpError(404, 'Daily not found')
 
-    if (daily.user_id != userId)
+    if (daily.userId != userId)
         throw new HttpError(401)
 
     if(daily.done == check)

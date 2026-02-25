@@ -17,11 +17,11 @@ export function isValidDate(dateString) {
 
 export function formatResetFrequencyText(incremental) {
     const resetFrequencyText = Object.keys(incrementalResetFrequencyTypes).find((key) =>
-        incrementalResetFrequencyTypes[key] === incremental.reset_frequency
+        incrementalResetFrequencyTypes[key] === incremental.resetFrequency
     )
-    return { ...incremental, reset_frequency: resetFrequencyText }
+    return { ...incremental, resetFrequency: resetFrequencyText }
 }
 
 export function formatResetFrequencyEnum(incremental) {
-    return { ...incremental, reset_frequency: incrementalResetFrequencyTypes[incremental.reset_frequency] }
+    return { ...incremental, resetFrequency: incrementalResetFrequencyTypes[incremental.resetFrequency] }
 }

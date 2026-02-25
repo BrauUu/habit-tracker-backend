@@ -6,7 +6,7 @@ export async function createTodo(userId, title, description, dueDate) {
   const res = await pool.query(
     `INSERT INTO habit_tracker.todos (id, user_id, title, description, due_date)
      VALUES ($1, $2, $3, $4, $5)
-     RETURNING todos.id, title, done_date, due_date, description, user_id`,
+     RETURNING todos.id, title, done_date AS "doneDate", due_date AS "dueDate", description, user_id AS "userId"`,
     [id, userId, title, description, dueDate]
   );
   return res.rows[0];
@@ -14,7 +14,7 @@ export async function createTodo(userId, title, description, dueDate) {
 
 export async function findById(todoId) {
   const res = await pool.query(
-    `SELECT todos.id, title, done_date, due_date, description, user_id FROM habit_tracker.todos
+    `SELECT todos.id, title, done_date AS "doneDate", due_date AS "dueDate", description, user_id AS "userId" FROM habit_tracker.todos
      WHERE todos.id = $1`,
     [todoId]
   );
@@ -26,7 +26,7 @@ export async function updateTodo(todoId, title, description, dueDate) {
     `UPDATE habit_tracker.todos
      SET title=$1, description=$2, due_date=$3
      WHERE todos.id = $4
-     RETURNING todos.id, title, done_date, due_date, description, user_id`,
+     RETURNING todos.id, title, done_date AS "doneDate", due_date AS "dueDate", description, user_id AS "userId"`,
     [title, description, dueDate, todoId]
   );
   return res.rows[0];
@@ -45,7 +45,7 @@ export async function updateDoneDate(todoId, doneDate) {
     `UPDATE habit_tracker.todos
      SET done_date = $1
      WHERE todos.id = $2
-     RETURNING todos.id, title, done_date, due_date, description, user_id`,
+     RETURNING todos.id, title, done_date AS "doneDate", due_date AS "dueDate", description, user_id AS "userId"`,
     [doneDate, todoId]
   );
   return res.rowCount;
@@ -69,7 +69,9 @@ export async function deleteTodosOlderThan7Days(userId) {
 
 export async function getTodosByUserId(userId) {
   const res = await pool.query(
-    "SELECT todos.id, title, done_date, due_date, description, user_id FROM habit_tracker.todos INNER JOIN habit_tracker.users on todos.user_id = users.id WHERE users.id = $1",
+    `SELECT todos.id, title, done_date AS "doneDate", due_date AS "dueDate", description, user_id AS "userId" FROM habit_tracker.todos 
+     INNER JOIN habit_tracker.users on todos.user_id = users.id 
+     WHERE users.id = $1`,
     [userId]
   );
   return res.rows;
@@ -88,14 +90,14 @@ export async function bulkCreateTodos(userId, todos, client ) {
     userId,
     todo.title,
     todo.description || null,
-    todo.due_date || null,
-    todo.done_date || null
+    todo.dueDate || null,
+    todo.doneDate || null
   ]);
   
   const query = `
     INSERT INTO habit_tracker.todos (id, user_id, title, description, due_date, done_date)
     VALUES ${values}
-    RETURNING id, title, done_date, due_date, description, user_id
+    RETURNING id, title, done_date AS "doneDate", due_date AS "dueDate", description, user_id AS "userId"
   `;
   
   const res = await client.query(query, params);
