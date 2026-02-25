@@ -10,7 +10,7 @@ export async function getTodo(todoId, userId) {
 
     const todo = await todoRepository.findById(todoId)
 
-    if(!todo) 
+    if (!todo)
         throw new HttpError(404, 'Todo not found')
     if (todo.userId != userId)
         throw new HttpError(401)
@@ -21,8 +21,8 @@ export async function getTodo(todoId, userId) {
 export async function updateTodo(todoId, userId, title, description, dueDate) {
 
     const todo = await todoRepository.findById(todoId)
-    
-    if(!todo) 
+
+    if (!todo)
         throw new HttpError(404, 'Todo not found')
 
     if (todo.userId != userId)
@@ -35,35 +35,37 @@ export async function updateTodo(todoId, userId, title, description, dueDate) {
 export async function deleteTodo(todoId, userId) {
 
     const todo = await todoRepository.findById(todoId)
-    
-    if(!todo) 
+
+    if (!todo)
         throw new HttpError(404, 'Todo not found')
 
     if (todo.userId != userId)
         throw new HttpError(401)
 
     await todoRepository.deleteTodo(todoId)
-    return 
+    return
 }
 
 export async function checkOrUncheckTodoById(todoId, userId, check) {
 
     const todo = await todoRepository.findById(todoId)
-    
-    if(!todo) 
+
+    if (!todo)
         throw new HttpError(404, 'Todo not found')
 
     if (todo.userId != userId)
         throw new HttpError(401)
 
-    if((todo.doneDate !== null && check) || (todo.doneDate === null && !check))
+    if ((todo.doneDate !== null && check) || (todo.doneDate === null && !check))
         throw new HttpError(400)
 
-    if(check) {
-        await todoRepository.updateDoneDate(todoId, new Date().toISOString())
+    if (check) {
+        const today = new Date()
+        today.setHours(3, 0, 0, 0)
+        await todoRepository.updateDoneDate(todoId, today)
         return
     }
-    
+
     await todoRepository.updateDoneDate(todoId, null)
     return
 }

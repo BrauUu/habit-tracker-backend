@@ -22,21 +22,21 @@ export async function getById(userId) {
 export async function createUser(username, password) {
   const id = randomUUID();
 
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setHours(3, 0, 0, 0)
 
   const res = await pool.query(
     `INSERT INTO habit_tracker.users (id, username, password, last_daily_reset_date)
      VALUES ($1, $2, $3, $4)
      RETURNING users.id, username, last_daily_reset_date AS "lastDailyResetDate" `,
-    [id, username, password, now]
+    [id, username, password, today]
   );
   return res.rows[0];
 }
 
 export async function updateLastDailyResetDate(userId) {
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  today.setHours(3, 0, 0, 0)
 
   const res = await pool.query(
     `UPDATE habit_tracker.users

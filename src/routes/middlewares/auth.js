@@ -16,6 +16,8 @@ export default function auth(req, res, next) {
 
             req.userId = decoded.id
         })
+
+        //TODO: verificar se userId existe no banco
         return next()
 
     } catch (err) {
