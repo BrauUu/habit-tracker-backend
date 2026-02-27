@@ -116,3 +116,54 @@ export async function bulkCreateIncrementals(userId, incrementals, client) {
   const res = await client.query(query, params);
   return res.rows;
 }
+
+export async function getIncrementalsToBereordered(oldPosition, newPosition, client = pool) {
+
+  const start = oldPosition < newPosition ? oldPosition + 1 : newPosition
+  const end = oldPosition < newPosition ? newPosition : oldPosition - 1
+
+  const res = await client.query(
+    `SELECT incrementals.id, "order", title FROM habit_tracker.incrementals
+     WHERE "order" BETWEEN $1 AND $2`,
+    [start, end]
+  );
+
+  return res.rows
+
+}
+
+export async function reorderOtherIncrementals(incrementals, oldPosition, newPosition, client = pool) {
+  const step = oldPosition < newPosition ? -1 : 1
+
+  const values = incrementals.map((incremental, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+    .join(', ')
+
+  const params = incrementals.flatMap(incremental => [
+    incremental.id,
+    Number(incremental.order) + step
+  ])
+
+  const res = await client.query(
+    `UPDATE habit_tracker.incrementals d
+     SET "order" = v.new_order::bigint
+     FROM (VALUES ${values}) AS v(id, new_order)
+     WHERE d.id = v.id::uuid
+     RETURNING d.id, d."order"`,
+    params
+  );
+
+  return res.rows
+}
+
+export async function reorderActualIncremental(incrementalId, newPosition, client = pool) {
+
+  const res = await client.query(
+    `UPDATE habit_tracker.incrementals
+      SET "order" = $1
+      WHERE incrementals.id = $2 
+      RETURNING incrementals.id, "order"`,
+    [newPosition, incrementalId]
+  );
+
+  return res.rows
+}

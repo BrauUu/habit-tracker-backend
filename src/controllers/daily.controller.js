@@ -1,3 +1,4 @@
+import { json } from "express";
 import * as dailyService from "../services/daily.service.js";
 import { isValidUUID } from "../utils/constants.js";
 
@@ -99,9 +100,27 @@ export async function checkOrUncheckDailyById(req, res, check) {
         const userId = req.userId
         if (!isValidUUID(dailyId))
             return res.status(400).json({ message: "'dailyId' invalid" })
-
+        
         await dailyService.checkOrUncheckDailyById(dailyId, userId, check)
         return res.sendStatus(200)
+        
+    } catch (err) {
+        console.log(err)
+        if (err.message) return res.status(err.status).json({ message: err.message })
+            return res.sendStatus(err.status)
+    }
+}
+
+export async function order(req, res) {
+    try {
+        const { oldPosition, newPosition} = req.body
+        const { dailyId } = req.params
+        const userId = req.userId
+        if (!isValidUUID(dailyId))
+            return res.status(400).json({ message: "'dailyId' invalid" })
+
+        const response = await dailyService.order(dailyId, userId, oldPosition, newPosition)
+        return res.status(200).json(response)
 
     } catch (err) {
         console.log(err)

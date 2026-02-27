@@ -105,3 +105,21 @@ export async function increaseOrDecreaseIncrementalById(req, res, increase) {
         return res.sendStatus(err.status)
     }
 }
+
+export async function order(req, res) {
+    try {
+        const { oldPosition, newPosition } = req.body
+        const { incrementalId } = req.params
+        const userId = req.userId
+        if (!isValidUUID(incrementalId))
+            return res.status(400).json({ message: "'incrementalId' invalid" })
+
+        const response = await incrementalService.order(incrementalId, userId, oldPosition, newPosition)
+        return res.status(200).json(response)
+
+    } catch (err) {
+        console.log(err)
+        if (err.message) return res.status(err.status).json({ message: err.message })
+        return res.sendStatus(err.status)
+    }
+}

@@ -19,7 +19,7 @@ export async function getPendingDailiesByUserId(userId) {
   yesterday.setDate(today.getDate() - 1);
 
   const res = await pool.query(
-     `SELECT dailies.id FROM habit_tracker.dailies INNER JOIN habit_tracker.users on dailies.user_id = users.id WHERE users.id = $1 and dailies.done = false and ${yesterday.getDay()} = any (dailies.days_of_the_week)`,
+    `SELECT dailies.id FROM habit_tracker.dailies INNER JOIN habit_tracker.users on dailies.user_id = users.id WHERE users.id = $1 and dailies.done = false and ${yesterday.getDay()} = any (dailies.days_of_the_week)`,
     [userId]
   );
   return res.rows;
@@ -46,8 +46,8 @@ export async function updateDaily(dailyId, title, description, daysOfTheWeek) {
 }
 
 export async function deleteDaily(dailyId) {
-   const res = await pool.query(
-     "DELETE FROM habit_tracker.dailies WHERE id = $1",
+  const res = await pool.query(
+    "DELETE FROM habit_tracker.dailies WHERE id = $1",
     [dailyId]
   );
   return res.rowCount;
@@ -99,11 +99,6 @@ export async function getDailiesByUserId(userId) {
 export async function bulkCreateDailies(userId, dailies, client) {
   if (dailies.length === 0) return [];
 
-  const values = dailies.map((_, index) => {
-    const offset = index * 7;
-    return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7})`;
-  }).join(', ');
-  
   const params = dailies.flatMap(daily => [
     randomUUID(),
     userId,
@@ -113,13 +108,66 @@ export async function bulkCreateDailies(userId, dailies, client) {
     daily.description || null,
     daily.daysOfTheWeek
   ]);
-  
+
   const query = `
     INSERT INTO habit_tracker.dailies (id, user_id, title, done, streak, description, days_of_the_week)
     VALUES ${values}
     RETURNING dailies.id, title, done, streak, description, days_of_the_week AS "daysOfTheWeek", user_id AS "userId"
   `;
-  
+
   const res = await client.query(query, params);
   return res.rows;
 }
+
+export async function getDailiesToBeReordered(oldPosition, newPosition, client = pool) {
+
+  const start = oldPosition < newPosition ? oldPosition + 1 : newPosition
+  const end = oldPosition < newPosition ? newPosition : oldPosition - 1
+
+  const res = await client.query(
+    `SELECT dailies.id, "order", title FROM habit_tracker.dailies
+     WHERE "order" BETWEEN $1 AND $2`,
+    [start, end]
+  );
+
+  return res.rows
+
+}
+
+export async function reorderOtherDailies(dailies, oldPosition, newPosition, client = pool) {
+  const step = oldPosition < newPosition ? -1 : 1
+
+  const values = dailies.map((daily, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+    .join(', ')
+
+  const params = dailies.flatMap(daily => [
+    daily.id,
+    Number(daily.order) + step
+  ])
+
+  const res = await client.query(
+    `UPDATE habit_tracker.dailies d
+     SET "order" = v.new_order::bigint
+     FROM (VALUES ${values}) AS v(id, new_order)
+     WHERE d.id = v.id::uuid
+     RETURNING d.id, d."order"`,
+    params
+  );
+
+  return res.rows
+}
+
+export async function reorderActualDaily(dailyId, newPosition, client = pool) {
+
+  const res = await client.query(
+    `UPDATE habit_tracker.dailies
+      SET "order" = $1
+      WHERE dailies.id = $2 
+      RETURNING dailies.id, "order"`,
+    [newPosition, dailyId]
+  );
+
+  return res.rows
+}
+
+

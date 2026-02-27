@@ -103,3 +103,54 @@ export async function bulkCreateTodos(userId, todos, client ) {
   const res = await client.query(query, params);
   return res.rows;
 }
+
+export async function getTodosToBereordered(oldPosition, newPosition, client = pool) {
+
+  const start = oldPosition < newPosition ? oldPosition + 1 : newPosition
+  const end = oldPosition < newPosition ? newPosition : oldPosition - 1
+
+  const res = await client.query(
+    `SELECT todos.id, "order", title FROM habit_tracker.todos
+     WHERE "order" BETWEEN $1 AND $2`,
+    [start, end]
+  );
+
+  return res.rows
+
+}
+
+export async function reorderOtherTodos(todos, oldPosition, newPosition, client = pool) {
+  const step = oldPosition < newPosition ? -1 : 1
+
+  const values = todos.map((todo, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+    .join(', ')
+
+  const params = todos.flatMap(todo => [
+    todo.id,
+    Number(todo.order) + step
+  ])
+
+  const res = await client.query(
+    `UPDATE habit_tracker.todos d
+     SET "order" = v.new_order::bigint
+     FROM (VALUES ${values}) AS v(id, new_order)
+     WHERE d.id = v.id::uuid
+     RETURNING d.id, d."order"`,
+    params
+  );
+
+  return res.rows
+}
+
+export async function reorderActualTodo(todoId, newPosition, client = pool) {
+
+  const res = await client.query(
+    `UPDATE habit_tracker.todos
+      SET "order" = $1
+      WHERE todos.id = $2 
+      RETURNING todos.id, "order"`,
+    [newPosition, todoId]
+  );
+
+  return res.rows
+}

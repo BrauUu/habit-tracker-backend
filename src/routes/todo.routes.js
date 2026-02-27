@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { create, getTodoById, updateTodoById, deleteTodoById, checkOrUncheckTodoById } from '../controllers/todo.controller.js';
+import { create, getTodoById, updateTodoById, deleteTodoById, checkOrUncheckTodoById, order } from '../controllers/todo.controller.js';
 import authMiddleware from './middlewares/auth.js';
 
 const router = Router();
@@ -27,6 +27,10 @@ router.put('/:todoId', async (req, res) => {
 
 router.delete('/:todoId', async (req, res) => {
     await deleteTodoById(req, res)
+})
+
+router.post('/:todoId/order', async (req, res) => {
+    await order(req, res)
 })
 
 export default router;

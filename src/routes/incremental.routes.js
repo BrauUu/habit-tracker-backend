@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { create, getIncrementalById, updateIncrementalById, deleteIncrementalById, increaseOrDecreaseIncrementalById } from '../controllers/incremental.controller.js';
+import { create, getIncrementalById, updateIncrementalById, deleteIncrementalById, increaseOrDecreaseIncrementalById, order } from '../controllers/incremental.controller.js';
 import authMiddleware from './middlewares/auth.js';
 
 const router = Router();
@@ -27,6 +27,10 @@ router.put('/:incrementalId', async (req, res) => {
 
 router.delete('/:incrementalId', async (req, res) => {
     await deleteIncrementalById(req, res)
+})
+
+router.post('/:incrementalId/order', async (req, res) => {
+    await order(req, res)
 })
 
 export default router;

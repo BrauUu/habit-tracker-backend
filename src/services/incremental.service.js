@@ -1,5 +1,6 @@
 import * as incrementalRepository from '../repositories/incremental.repository.js'
 import HttpError from '../errors/HttpError.js'
+import pool from '../database/config.js'
 
 export async function createIncremental(userId, title, description, resetFrequency) {
     const incremental = await incrementalRepository.createIncremental(userId, title, description, resetFrequency)
@@ -64,4 +65,38 @@ export async function increaseOrDecreaseIncremental(incrementalId, userId, incre
 
     await incrementalRepository.updateNegativeCount(incrementalId, parseInt(incremental.negativeCount) + 1)
     return
+}
+
+export async function order(incrementalId, userId, oldPosition, newPosition) {
+
+    const client = await pool.connect();
+
+    const incremental = await incrementalRepository.findById(incrementalId)
+
+    if (!incremental)
+        throw new HttpError(404, 'Incremental not found')
+
+    if (incremental.userId != userId)
+        throw new HttpError(401)
+
+    try {
+        await client.query('BEGIN');
+
+        const incrementalsToBeReordered = await incrementalRepository.getIncrementalsToBereordered(oldPosition, newPosition, client)
+        
+        const [otherIncrementals, actualIncremental] = await Promise.all([
+            incrementalRepository.reorderOtherIncrementals(incrementalsToBeReordered, oldPosition, newPosition, client),
+            incrementalRepository.reorderActualIncremental(incrementalId, newPosition, client)
+        ])
+
+        await client.query('COMMIT');
+
+        return [...otherIncrementals, ...actualIncremental]
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
 }
