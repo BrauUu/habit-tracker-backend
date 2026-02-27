@@ -2,8 +2,8 @@ import * as todoRepository from '../repositories/todo.repository.js'
 import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
 
-export async function createTodo(userId, title, description, dueDate) {
-    const todo = await todoRepository.createTodo(userId, title, description, dueDate)
+export async function createTodo(userId, title, description, dueDate, order) {
+    const todo = await todoRepository.createTodo(userId, title, description, dueDate, order)
     return todo
 }
 

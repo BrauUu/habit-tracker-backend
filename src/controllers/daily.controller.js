@@ -4,7 +4,7 @@ import { isValidUUID } from "../utils/constants.js";
 
 export async function create(req, res) {
     try {
-        const { title, description, daysOfTheWeek } = req.body
+        const { title, description, daysOfTheWeek, order } = req.body
         const userId = req.userId
         if (!title)
             return res.status(400).json({ message: "'title' required" })
@@ -12,8 +12,10 @@ export async function create(req, res) {
             return res.status(400).json({ message: "'title' must be no longer than 250 characters" })
         if (description && description.length > 250)
             return res.status(400).json({ message: "'description' must be no longer than 250 characters" })
+        if (!order || typeof(order) != "number") 
+            return res.status(400).json({ message: "'order' required and should be 'number'" })
 
-        const daily = await dailyService.createDaily(userId, title, description, daysOfTheWeek)
+        const daily = await dailyService.createDaily(userId, title, description, daysOfTheWeek, order)
         return res.status(201).json(daily)
 
     } catch (err) {

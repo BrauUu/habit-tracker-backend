@@ -2,8 +2,8 @@ import * as dailyRepository from '../repositories/daily.repository.js'
 import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
 
-export async function createDaily(userId, title, description, daysOfTheWeek) {
-    const daily = await dailyRepository.createDaily(userId, title, description, daysOfTheWeek)
+export async function createDaily(userId, title, description, daysOfTheWeek, order) {
+    const daily = await dailyRepository.createDaily(userId, title, description, daysOfTheWeek, order)
     return daily
 }
 

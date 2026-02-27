@@ -3,7 +3,7 @@ import { isValidUUID, isValidDate } from "../utils/constants.js";
 
 export async function create(req, res) {
     try {
-        const { title, description, dueDate } = req.body
+        const { title, description, dueDate, order } = req.body
         const userId = req.userId
 
         if (!title)
@@ -14,8 +14,10 @@ export async function create(req, res) {
             return res.status(400).json({ message: "'description' must be no longer than 250 characters" })
         if (dueDate && !isValidDate(dueDate))
             return res.status(400).json({ message: "'dueDate' must be a valid date in YYYY-MM-DD format" })
+        if (!order || typeof(order) != "number") 
+            return res.status(400).json({ message: "'order' required and should be 'number'" })
 
-        const todo = await todoService.createTodo(userId, title, description, dueDate)
+        const todo = await todoService.createTodo(userId, title, description, dueDate, order)
         return res.status(201).json(todo)
 
     } catch (err) {

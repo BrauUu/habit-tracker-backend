@@ -2,8 +2,8 @@ import * as incrementalRepository from '../repositories/incremental.repository.j
 import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
 
-export async function createIncremental(userId, title, description, resetFrequency) {
-    const incremental = await incrementalRepository.createIncremental(userId, title, description, resetFrequency)
+export async function createIncremental(userId, title, description, resetFrequency, order) {
+    const incremental = await incrementalRepository.createIncremental(userId, title, description, resetFrequency, order)
     return incremental
 }
 
