@@ -105,7 +105,7 @@ export async function bulkCreateIncrementals(userId, incrementals, client) {
     incremental.negativeCount,
     incremental.description || null,
     formatResetFrequencyEnum(incremental).resetFrequency,
-    daily.order || i + 1
+    incremental.order || i + 1
   ]);
 
   const query = `
