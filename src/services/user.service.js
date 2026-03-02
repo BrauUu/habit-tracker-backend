@@ -78,6 +78,14 @@ export async function login(username, password) {
 
 }
 
+export async function refreshToken(userId) {
+
+    const token = generateToken(userId)
+
+    return {token}
+
+}
+
 export async function startNewDay(userId) {
 
     const [dailies, incrementalsUpdates, deletedTodos, user] = await Promise.all([

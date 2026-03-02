@@ -17,6 +17,18 @@ export async function login(req, res) {
     }
 }
 
+export async function refreshToken(req, res) {
+    try {
+        const userId = req.userId
+        const token = await userService.refreshToken(userId)
+        return res.status(200).json(token)
+    } catch (err) {
+        console.log(err)
+        if (err.message) return res.status(err.status).json({ message: err.message })
+        return res.sendStatus(err.status)
+    }
+}
+
 export async function create(req, res) {
     try {
         const { username, password } = req.body

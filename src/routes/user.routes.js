@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {create, login, startNewDay, synchronizeHabits, getAllDataFromUser, deleteUserByUserId} from '../controllers/user.controller.js';
+import {create, login, refreshToken, startNewDay, synchronizeHabits, getAllDataFromUser, deleteUserByUserId} from '../controllers/user.controller.js';
 import authMiddleware from './middlewares/auth.js';
 
 const router = Router();
@@ -11,6 +11,10 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     await login(req, res)
+})
+
+router.post('/user/refreshToken', async (req, res) => {
+    await refreshToken(req, res)
 })
 
 router.post('/user/newDay', async (req, res) => {
