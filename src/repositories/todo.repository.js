@@ -60,7 +60,7 @@ export async function deleteTodosOlderThan7Days(userId) {
 
   const res = await pool.query(
     `DELETE FROM habit_tracker.todos 
-     WHERE todos.id = $1 and done_date <= $2
+     WHERE todos.user_id = $1 and done_date <= $2
      RETURNING todos.id`,
     [userId, doneDate]
   );
