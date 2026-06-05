@@ -82,7 +82,7 @@ export async function order(incrementalId, userId, oldPosition, newPosition) {
     try {
         await client.query('BEGIN');
 
-        const incrementalsToBeReordered = await incrementalRepository.getIncrementalsToBereordered(oldPosition, newPosition, client)
+        const incrementalsToBeReordered = await incrementalRepository.getIncrementalsToBereordered(userId, oldPosition, newPosition, client)
         
         const [otherIncrementals, actualIncremental] = await Promise.all([
             incrementalRepository.reorderOtherIncrementals(incrementalsToBeReordered, oldPosition, newPosition, client),

@@ -125,15 +125,15 @@ export async function bulkCreateDailies(userId, dailies, client) {
   return res.rows;
 }
 
-export async function getDailiesToBeReordered(oldPosition, newPosition, client = pool) {
+export async function getDailiesToBeReordered(userId, oldPosition, newPosition, client = pool) {
 
   const start = oldPosition < newPosition ? oldPosition + 1 : newPosition
   const end = oldPosition < newPosition ? newPosition : oldPosition - 1
 
   const res = await client.query(
     `SELECT dailies.id, "order", title FROM habit_tracker.dailies
-     WHERE "order" BETWEEN $1 AND $2`,
-    [start, end]
+     WHERE user_id = $1 AND "order" BETWEEN $2 AND $3`,
+    [userId, start, end]
   );
 
   return res.rows
@@ -175,5 +175,4 @@ export async function reorderActualDaily(dailyId, newPosition, client = pool) {
 
   return res.rows
 }
-
 

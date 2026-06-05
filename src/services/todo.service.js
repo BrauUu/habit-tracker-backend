@@ -86,7 +86,7 @@ export async function order(todoId, userId, oldPosition, newPosition) {
     try {
         await client.query('BEGIN');
 
-        const todosToBeReordered = await todoRepository.getTodosToBereordered(oldPosition, newPosition, client)
+        const todosToBeReordered = await todoRepository.getTodosToBereordered(userId, oldPosition, newPosition, client)
         
         const [otherTodos, actualTodo] = await Promise.all([
             todoRepository.reorderOtherTodos(todosToBeReordered, oldPosition, newPosition, client),

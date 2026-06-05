@@ -105,15 +105,15 @@ export async function bulkCreateTodos(userId, todos, client ) {
   return res.rows;
 }
 
-export async function getTodosToBereordered(oldPosition, newPosition, client = pool) {
+export async function getTodosToBereordered(userId, oldPosition, newPosition, client = pool) {
 
   const start = oldPosition < newPosition ? oldPosition + 1 : newPosition
   const end = oldPosition < newPosition ? newPosition : oldPosition - 1
 
   const res = await client.query(
     `SELECT todos.id, "order", title FROM habit_tracker.todos
-     WHERE "order" BETWEEN $1 AND $2`,
-    [start, end]
+     WHERE user_id = $1 AND "order" BETWEEN $2 AND $3`,
+    [userId, start, end]
   );
 
   return res.rows

@@ -90,7 +90,7 @@ export async function order(dailyId, userId, oldPosition, newPosition) {
     try {
         await client.query('BEGIN');
 
-        const dailiesToBeReordered = await dailyRepository.getDailiesToBeReordered(oldPosition, newPosition, client)
+        const dailiesToBeReordered = await dailyRepository.getDailiesToBeReordered(userId, oldPosition, newPosition, client)
         
         const [otherDailies, actualDaily] = await Promise.all([
             dailyRepository.reorderOtherDailies(dailiesToBeReordered, oldPosition, newPosition, client),

@@ -118,15 +118,15 @@ export async function bulkCreateIncrementals(userId, incrementals, client) {
   return res.rows;
 }
 
-export async function getIncrementalsToBereordered(oldPosition, newPosition, client = pool) {
+export async function getIncrementalsToBereordered(userId, oldPosition, newPosition, client = pool) {
 
   const start = oldPosition < newPosition ? oldPosition + 1 : newPosition
   const end = oldPosition < newPosition ? newPosition : oldPosition - 1
 
   const res = await client.query(
     `SELECT incrementals.id, "order", title FROM habit_tracker.incrementals
-     WHERE "order" BETWEEN $1 AND $2`,
-    [start, end]
+     WHERE user_id = $1 AND "order" BETWEEN $2 AND $3`,
+    [userId, start, end]
   );
 
   return res.rows
