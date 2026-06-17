@@ -13,8 +13,8 @@ export async function createIncremental(userId, title, description, resetFrequen
   return res.rows[0];
 }
 
-export async function findById(incrementalId) {
-  const res = await pool.query(
+export async function findById(incrementalId, client = pool) {
+  const res = await client.query(
     `SELECT incrementals.id, title, reset_frequency AS "resetFrequency", positive_count AS "positiveCount", negative_count AS "negativeCount", description, user_id AS "userId", "order" FROM habit_tracker.incrementals
      WHERE id = $1`,
     [incrementalId]
@@ -89,6 +89,39 @@ export async function getIncrementalsByUserId(userId) {
   return res.rows;
 }
 
+export async function getIncrementalOrdersByUserId(userId, client = pool) {
+  const res = await client.query(
+    `SELECT incrementals.id, "order" FROM habit_tracker.incrementals
+     WHERE user_id = $1
+     ORDER BY "order", id`,
+    [userId]
+  );
+  return res.rows;
+}
+
+export async function updateIncrementalOrders(incrementals, client = pool) {
+  if (incrementals.length === 0) return [];
+
+  const values = incrementals.map((_, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
+    .join(', ')
+
+  const params = incrementals.flatMap(incremental => [
+    incremental.id,
+    incremental.order
+  ])
+
+  const res = await client.query(
+    `UPDATE habit_tracker.incrementals d
+     SET "order" = v.new_order::bigint
+     FROM (VALUES ${values}) AS v(id, new_order)
+     WHERE d.id = v.id::uuid
+     RETURNING d.id, d."order"`,
+    params
+  );
+
+  return res.rows;
+}
+
 export async function bulkCreateIncrementals(userId, incrementals, client) {
   if (incrementals.length === 0) return [];
 
@@ -116,55 +149,4 @@ export async function bulkCreateIncrementals(userId, incrementals, client) {
 
   const res = await client.query(query, params);
   return res.rows;
-}
-
-export async function getIncrementalsToBereordered(userId, oldPosition, newPosition, client = pool) {
-
-  const start = oldPosition < newPosition ? oldPosition + 1 : newPosition
-  const end = oldPosition < newPosition ? newPosition : oldPosition - 1
-
-  const res = await client.query(
-    `SELECT incrementals.id, "order", title FROM habit_tracker.incrementals
-     WHERE user_id = $1 AND "order" BETWEEN $2 AND $3`,
-    [userId, start, end]
-  );
-
-  return res.rows
-
-}
-
-export async function reorderOtherIncrementals(incrementals, oldPosition, newPosition, client = pool) {
-  const step = oldPosition < newPosition ? -1 : 1
-
-  const values = incrementals.map((incremental, i) => `($${i * 2 + 1}, $${i * 2 + 2})`)
-    .join(', ')
-
-  const params = incrementals.flatMap(incremental => [
-    incremental.id,
-    Number(incremental.order) + step
-  ])
-
-  const res = await client.query(
-    `UPDATE habit_tracker.incrementals d
-     SET "order" = v.new_order::bigint
-     FROM (VALUES ${values}) AS v(id, new_order)
-     WHERE d.id = v.id::uuid
-     RETURNING d.id, d."order"`,
-    params
-  );
-
-  return res.rows
-}
-
-export async function reorderActualIncremental(incrementalId, newPosition, client = pool) {
-
-  const res = await client.query(
-    `UPDATE habit_tracker.incrementals
-      SET "order" = $1
-      WHERE incrementals.id = $2 
-      RETURNING incrementals.id, "order"`,
-    [newPosition, incrementalId]
-  );
-
-  return res.rows
 }

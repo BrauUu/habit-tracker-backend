@@ -1,6 +1,7 @@
 import * as todoRepository from '../repositories/todo.repository.js'
 import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
+import { moveItemToPosition } from '../utils/ordering.js'
 
 export async function createTodo(userId, title, description, dueDate, order) {
     const todo = await todoRepository.createTodo(userId, title, description, dueDate, order)
@@ -71,36 +72,57 @@ export async function checkOrUncheckTodoById(todoId, userId, check) {
     return
 }
 
-export async function order(todoId, userId, oldPosition, newPosition) {
+async function reorderTodo(todoId, userId, newPosition) {
 
     const client = await pool.connect();
-
-    const todo = await todoRepository.findById(todoId)
-
-    if (!todo)
-        throw new HttpError(404, 'Todo not found')
-
-    if (todo.userId != userId)
-        throw new HttpError(401)
 
     try {
         await client.query('BEGIN');
 
-        const todosToBeReordered = await todoRepository.getTodosToBereordered(userId, oldPosition, newPosition, client)
-        
-        const [otherTodos, actualTodo] = await Promise.all([
-            todoRepository.reorderOtherTodos(todosToBeReordered, oldPosition, newPosition, client),
-            todoRepository.reorderActualTodo(todoId, newPosition, client)
-        ])
+        const todo = await todoRepository.findById(todoId, client)
+
+        if (!todo)
+            throw new HttpError(404, 'Todo not found')
+
+        if (todo.userId != userId)
+            throw new HttpError(401)
+
+        const todos = await todoRepository.getTodoOrdersByUserId(userId, client)
+
+        if (newPosition > todos.length)
+            throw new HttpError(400, "'newPosition' should be within the list bounds")
+
+        const reorderedTodos = moveItemToPosition(todos, todoId, newPosition)
+        await todoRepository.updateTodoOrders(reorderedTodos, client)
+        const updatedTodos = await todoRepository.getTodoOrdersByUserId(userId, client)
 
         await client.query('COMMIT');
 
-        return [...otherTodos, ...actualTodo]
+        return updatedTodos
 
     } catch (error) {
         await client.query('ROLLBACK');
         throw error;
     } finally {
         client.release();
+    }
+}
+
+export async function order(todoId, userId, newPosition) {
+    if (!Number.isInteger(newPosition) || newPosition < 1)
+        throw new HttpError(400, "'newPosition' required and should be a positive integer")
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            return await reorderTodo(todoId, userId, newPosition)
+        } catch (error) {
+            if (error.code === '23505' && attempt === 0)
+                continue
+
+            if (error.code === '23505')
+                throw new HttpError(409, 'Habit order changed. Please try again.')
+
+            throw error
+        }
     }
 }

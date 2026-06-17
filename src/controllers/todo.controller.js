@@ -108,13 +108,13 @@ export async function checkOrUncheckTodoById(req, res, check) {
 
 export async function order(req, res) {
     try {
-        const { oldPosition, newPosition } = req.body
+        const { newPosition } = req.body
         const { todoId } = req.params
         const userId = req.userId
         if (!isValidUUID(todoId))
             return res.status(400).json({ message: "'todoId' invalid" })
 
-        const response = await todoService.order(todoId, userId, oldPosition, newPosition)
+        const response = await todoService.order(todoId, userId, newPosition)
         return res.status(200).json(response)
 
     } catch (err) {

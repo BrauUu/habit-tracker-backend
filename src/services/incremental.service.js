@@ -1,6 +1,7 @@
 import * as incrementalRepository from '../repositories/incremental.repository.js'
 import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
+import { moveItemToPosition } from '../utils/ordering.js'
 
 export async function createIncremental(userId, title, description, resetFrequency, order) {
     const incremental = await incrementalRepository.createIncremental(userId, title, description, resetFrequency, order)
@@ -67,36 +68,57 @@ export async function increaseOrDecreaseIncremental(incrementalId, userId, incre
     return
 }
 
-export async function order(incrementalId, userId, oldPosition, newPosition) {
+async function reorderIncremental(incrementalId, userId, newPosition) {
 
     const client = await pool.connect();
-
-    const incremental = await incrementalRepository.findById(incrementalId)
-
-    if (!incremental)
-        throw new HttpError(404, 'Incremental not found')
-
-    if (incremental.userId != userId)
-        throw new HttpError(401)
 
     try {
         await client.query('BEGIN');
 
-        const incrementalsToBeReordered = await incrementalRepository.getIncrementalsToBereordered(userId, oldPosition, newPosition, client)
-        
-        const [otherIncrementals, actualIncremental] = await Promise.all([
-            incrementalRepository.reorderOtherIncrementals(incrementalsToBeReordered, oldPosition, newPosition, client),
-            incrementalRepository.reorderActualIncremental(incrementalId, newPosition, client)
-        ])
+        const incremental = await incrementalRepository.findById(incrementalId, client)
+
+        if (!incremental)
+            throw new HttpError(404, 'Incremental not found')
+
+        if (incremental.userId != userId)
+            throw new HttpError(401)
+
+        const incrementals = await incrementalRepository.getIncrementalOrdersByUserId(userId, client)
+
+        if (newPosition > incrementals.length)
+            throw new HttpError(400, "'newPosition' should be within the list bounds")
+
+        const reorderedIncrementals = moveItemToPosition(incrementals, incrementalId, newPosition)
+        await incrementalRepository.updateIncrementalOrders(reorderedIncrementals, client)
+        const updatedIncrementals = await incrementalRepository.getIncrementalOrdersByUserId(userId, client)
 
         await client.query('COMMIT');
 
-        return [...otherIncrementals, ...actualIncremental]
+        return updatedIncrementals
 
     } catch (error) {
         await client.query('ROLLBACK');
         throw error;
     } finally {
         client.release();
+    }
+}
+
+export async function order(incrementalId, userId, newPosition) {
+    if (!Number.isInteger(newPosition) || newPosition < 1)
+        throw new HttpError(400, "'newPosition' required and should be a positive integer")
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            return await reorderIncremental(incrementalId, userId, newPosition)
+        } catch (error) {
+            if (error.code === '23505' && attempt === 0)
+                continue
+
+            if (error.code === '23505')
+                throw new HttpError(409, 'Habit order changed. Please try again.')
+
+            throw error
+        }
     }
 }

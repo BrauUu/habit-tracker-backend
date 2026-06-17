@@ -115,13 +115,13 @@ export async function checkOrUncheckDailyById(req, res, check) {
 
 export async function order(req, res) {
     try {
-        const { oldPosition, newPosition} = req.body
+        const { newPosition} = req.body
         const { dailyId } = req.params
         const userId = req.userId
         if (!isValidUUID(dailyId))
             return res.status(400).json({ message: "'dailyId' invalid" })
 
-        const response = await dailyService.order(dailyId, userId, oldPosition, newPosition)
+        const response = await dailyService.order(dailyId, userId, newPosition)
         return res.status(200).json(response)
 
     } catch (err) {
