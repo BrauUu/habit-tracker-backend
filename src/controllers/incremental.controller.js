@@ -4,7 +4,7 @@ import { isValidUUID, incrementalResetFrequencyTypes, formatResetFrequencyText }
 
 export async function create(req, res) {
     try {
-        const { title, description, resetFrequency, order } = req.body
+        const { title, description, resetFrequency } = req.body
         const userId = req.userId
         const resetFrequencyNumeric = incrementalResetFrequencyTypes[resetFrequency];
 
@@ -16,10 +16,8 @@ export async function create(req, res) {
             return res.status(400).json({ message: "'description' must be no longer than 250 characters" })
         if (resetFrequencyNumeric === undefined)
             return res.status(400).json({ message: `'resetFrequency' should be: ${Object.keys(incrementalResetFrequencyTypes).map(key => `'${key}'`).join(' or ')}` })
-        if (!order || typeof(order) != "number") 
-            return res.status(400).json({ message: "'order' required and should be 'number'" })
 
-        const incremental = await incrementalService.createIncremental(userId, title, description, resetFrequencyNumeric, order)
+        const incremental = await incrementalService.createIncremental(userId, title, description, resetFrequencyNumeric)
         return res.status(201).json(formatResetFrequencyText(incremental))
 
     } catch (err) {

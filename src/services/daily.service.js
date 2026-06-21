@@ -3,7 +3,8 @@ import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
 import { moveItemToPosition } from '../utils/ordering.js'
 
-export async function createDaily(userId, title, description, daysOfTheWeek, order) {
+export async function createDaily(userId, title, description, daysOfTheWeek) {
+    const order = await dailyRepository.getNextOrderByUserId(userId)
     const daily = await dailyRepository.createDaily(userId, title, description, daysOfTheWeek, order)
     return daily
 }

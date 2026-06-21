@@ -3,7 +3,8 @@ import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
 import { moveItemToPosition } from '../utils/ordering.js'
 
-export async function createTodo(userId, title, description, dueDate, order) {
+export async function createTodo(userId, title, description, dueDate) {
+    const order = await todoRepository.getNextOrderByUserId(userId)
     const todo = await todoRepository.createTodo(userId, title, description, dueDate, order)
     return todo
 }

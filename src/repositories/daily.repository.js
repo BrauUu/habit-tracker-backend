@@ -136,7 +136,7 @@ export async function bulkCreateDailies(userId, dailies, client) {
     const offset = index * 8;
     return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
   }).join(', ');
-  
+
   const params = dailies.flatMap((daily, i) => [
     randomUUID(),
     userId,
@@ -147,7 +147,7 @@ export async function bulkCreateDailies(userId, dailies, client) {
     daily.daysOfTheWeek,
     daily.order || i + 1
   ]);
-  
+
   const query = `
     INSERT INTO habit_tracker.dailies (id, user_id, title, done, streak, description, days_of_the_week, "order")
     VALUES ${values}
@@ -158,3 +158,13 @@ export async function bulkCreateDailies(userId, dailies, client) {
   return res.rows;
 }
 
+export async function getNextOrderByUserId(userId) {
+  const res = await pool.query(
+    `SELECT COALESCE(MAX("order"), 0) + 1 AS "nextOrder"
+     FROM habit_tracker.dailies
+     WHERE user_id = $1`,
+    [userId]
+  )
+
+  return Number(res.rows[0].nextOrder)
+}

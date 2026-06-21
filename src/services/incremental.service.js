@@ -3,7 +3,8 @@ import HttpError from '../errors/HttpError.js'
 import pool from '../database/config.js'
 import { moveItemToPosition } from '../utils/ordering.js'
 
-export async function createIncremental(userId, title, description, resetFrequency, order) {
+export async function createIncremental(userId, title, description, resetFrequency) {
+     const order = await incrementalRepository.getNextOrderByUserId(userId)
     const incremental = await incrementalRepository.createIncremental(userId, title, description, resetFrequency, order)
     return incremental
 }

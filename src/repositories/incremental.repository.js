@@ -150,3 +150,14 @@ export async function bulkCreateIncrementals(userId, incrementals, client) {
   const res = await client.query(query, params);
   return res.rows;
 }
+
+export async function getNextOrderByUserId(userId) {
+  const res = await pool.query(
+    `SELECT COALESCE(MAX("order"), 0) + 1 AS "nextOrder"
+     FROM habit_tracker.incrementals
+     WHERE user_id = $1`,
+    [userId]
+  )
+
+  return Number(res.rows[0].nextOrder)
+}
