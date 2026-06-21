@@ -141,7 +141,7 @@ export async function bulkCreateTodos(userId, todos, client ) {
 export async function getNextOrderByUserId(userId) {
   const res = await pool.query(
     `SELECT COALESCE(MAX("order"), 0) + 1 AS "nextOrder"
-     FROM habit_tracker.todo
+     FROM habit_tracker.todos
      WHERE user_id = $1`,
     [userId]
   )
