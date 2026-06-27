@@ -93,10 +93,6 @@ async function reorderDaily(dailyId, userId, newPosition) {
             throw new HttpError(401)
 
         const dailies = await dailyRepository.getDailyOrdersByUserId(userId, client)
-
-        if (newPosition > dailies.length)
-            throw new HttpError(400, "'newPosition' should be within the list bounds")
-
         const reorderedDailies = moveItemToPosition(dailies, dailyId, newPosition)
         await dailyRepository.updateDailyOrders(reorderedDailies, client)
         const updatedDailies = await dailyRepository.getDailyOrdersByUserId(userId, client)

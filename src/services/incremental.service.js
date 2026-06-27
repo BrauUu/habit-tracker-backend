@@ -85,10 +85,6 @@ async function reorderIncremental(incrementalId, userId, newPosition) {
             throw new HttpError(401)
 
         const incrementals = await incrementalRepository.getIncrementalOrdersByUserId(userId, client)
-
-        if (newPosition > incrementals.length)
-            throw new HttpError(400, "'newPosition' should be within the list bounds")
-
         const reorderedIncrementals = moveItemToPosition(incrementals, incrementalId, newPosition)
         await incrementalRepository.updateIncrementalOrders(reorderedIncrementals, client)
         const updatedIncrementals = await incrementalRepository.getIncrementalOrdersByUserId(userId, client)

@@ -89,10 +89,6 @@ async function reorderTodo(todoId, userId, newPosition) {
             throw new HttpError(401)
 
         const todos = await todoRepository.getTodoOrdersByUserId(userId, client)
-
-        if (newPosition > todos.length)
-            throw new HttpError(400, "'newPosition' should be within the list bounds")
-
         const reorderedTodos = moveItemToPosition(todos, todoId, newPosition)
         await todoRepository.updateTodoOrders(reorderedTodos, client)
         const updatedTodos = await todoRepository.getTodoOrdersByUserId(userId, client)
