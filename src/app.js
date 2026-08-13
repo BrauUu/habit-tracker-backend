@@ -16,6 +16,7 @@ const limiter = rateLimit({
 	limit: 100, 
 	standardHeaders: 'draft-8',
 	legacyHeaders: false, 
+	message: { message: 'Too many requests, please try again later.' },
 	ipv6Subnet: 56,
 	validate: {xForwardedForHeader: false}
 })
