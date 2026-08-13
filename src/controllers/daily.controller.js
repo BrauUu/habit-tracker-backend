@@ -10,8 +10,8 @@ export async function create(req, res) {
             return res.status(400).json({ message: "'title' required" })
         if (title.length > 250)
             return res.status(400).json({ message: "'title' must be no longer than 250 characters" })
-        if (description && description.length > 250)
-            return res.status(400).json({ message: "'description' must be no longer than 250 characters" })
+        if (description && description.length > 500)
+            return res.status(400).json({ message: "'description' must be no longer than 500 characters" })
 
         const daily = await dailyService.createDaily(userId, title, description, daysOfTheWeek)
         return res.status(201).json(daily)
@@ -79,8 +79,8 @@ export async function updateDailyByDailyId(req, res) {
             return res.status(400).json({ message: "'title' required" })
         if (title.length > 250)
             return res.status(400).json({ message: "'title' must be no longer than 250 characters" })
-        if (description && description.length > 250)
-            return res.status(400).json({ message: "'description' must be no longer than 250 characters" })
+        if (description && description.length > 500)
+            return res.status(400).json({ message: "'description' must be no longer than 500 characters" })
         if (!isValidUUID(dailyId))
             return res.status(400).json({ message: "'dailyId' invalid" })
 

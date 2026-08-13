@@ -10,8 +10,8 @@ export async function create(req, res) {
             return res.status(400).json({ message: "'title' required" })
         if (title.length > 250)
             return res.status(400).json({ message: "'title' must be no longer than 250 characters" })
-        if (description && description.length > 250)
-            return res.status(400).json({ message: "'description' must be no longer than 250 characters" })
+        if (description && description.length > 500)
+            return res.status(400).json({ message: "'description' must be no longer than 500 characters" })
         if (dueDate && !isValidDate(dueDate))
             return res.status(400).json({ message: "'dueDate' must be a valid date in YYYY-MM-DD format" })
 
@@ -69,8 +69,8 @@ export async function updateTodoById(req, res) {
             return res.status(400).json({ message: "'title' required" })
         if (title.length > 250)
             return res.status(400).json({ message: "'title' must be no longer than 250 characters" })
-        if (description && description.length > 250)
-            return res.status(400).json({ message: "'description' must be no longer than 250 characters" })
+        if (description && description.length > 500)
+            return res.status(400).json({ message: "'description' must be no longer than 500 characters" })
         if (dueDate && !isValidDate(dueDate))
             return res.status(400).json({ message: "'dueDate' must be a valid date in YYYY-MM-DD format" })
 
