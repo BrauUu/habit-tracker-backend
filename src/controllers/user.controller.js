@@ -67,6 +67,9 @@ export async function synchronizeHabits(req, res) {
     try {
         const userId = req.userId
         const habits = req.body
+
+       //TODO: Validar todos os hábitos se cumpre os requisitos (campos obrigatorios e max length)
+
         const data = await userService.synchronizeHabits(userId, habits)
         return res.status(201).json(data)
 
