@@ -20,7 +20,7 @@ export async function getDaily(dailyId, userId) {
     const daily = await dailyRepository.findById(dailyId)
 
     if (!daily)
-        throw new HttpError(404, 'Daily not found')
+        throw new HttpError(404, 'daily not found')
     if (daily.userId != userId)
         throw new HttpError(401)
 
@@ -32,7 +32,7 @@ export async function updateDaily(dailyId, userId, title, description, daysOfThe
     const daily = await dailyRepository.findById(dailyId)
 
     if (!daily)
-        throw new HttpError(404, 'Daily not found')
+        throw new HttpError(404, 'daily not found')
 
     if (daily.userId != userId)
         throw new HttpError(401)
@@ -46,7 +46,7 @@ export async function deleteDaily(dailyId, userId) {
     const daily = await dailyRepository.findById(dailyId)
 
     if (!daily)
-        throw new HttpError(404, 'Daily not found')
+        throw new HttpError(404, 'daily not found')
 
     if (daily.userId != userId)
         throw new HttpError(401)
@@ -60,7 +60,7 @@ export async function checkOrUncheckDailyById(dailyId, userId, check) {
     const daily = await dailyRepository.findById(dailyId)
 
     if (!daily)
-        throw new HttpError(404, 'Daily not found')
+        throw new HttpError(404, 'daily not found')
 
     if (daily.userId != userId)
         throw new HttpError(401)
@@ -87,7 +87,7 @@ async function reorderDaily(dailyId, userId, newPosition) {
         const daily = await dailyRepository.findById(dailyId, client)
 
         if (!daily)
-            throw new HttpError(404, 'Daily not found')
+            throw new HttpError(404, 'daily not found')
 
         if (daily.userId != userId)
             throw new HttpError(401)
@@ -121,7 +121,7 @@ export async function order(dailyId, userId, newPosition) {
                 continue
 
             if (error.code === '23505')
-                throw new HttpError(409, 'Habit order changed. Please try again.')
+                throw new HttpError(409, 'habit order changed. Please try again.')
 
             throw error
         }
