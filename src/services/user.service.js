@@ -51,7 +51,7 @@ export async function create(username, password) {
 
     const exists = await userRepository.getByUsername(username)
 
-    if (exists) throw new HttpError(409, 'User already exists')
+    if (exists) throw new HttpError(409, 'user already exists')
 
     const hashedPassword = await hash(password, 10);
     const { password: _, ...userWithoutPassword } = await userRepository.createUser(username, hashedPassword)
@@ -65,12 +65,12 @@ export async function login(username, password) {
 
     const user = await userRepository.getByUsername(username)
 
-    if (!user) throw new HttpError(400, "Incorrect 'password' or 'username'")
+    if (!user) throw new HttpError(400, "incorrect 'password' or 'username'")
 
     const { password: hashedPassword, ...userWithoutPassword } = user
     const isPasswordCorrect = await compare(password, hashedPassword)
 
-    if (!isPasswordCorrect) throw new HttpError(400, "Incorrect 'password' or 'username'")
+    if (!isPasswordCorrect) throw new HttpError(400, "incorrect 'password' or 'username'")
 
     const token = generateToken(userWithoutPassword.id)
 

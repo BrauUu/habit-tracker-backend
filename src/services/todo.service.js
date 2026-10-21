@@ -14,7 +14,7 @@ export async function getTodo(todoId, userId) {
     const todo = await todoRepository.findById(todoId)
 
     if (!todo)
-        throw new HttpError(404, 'Todo not found')
+        throw new HttpError(404, 'todo not found')
     if (todo.userId != userId)
         throw new HttpError(401)
 
@@ -26,7 +26,7 @@ export async function updateTodo(todoId, userId, title, description, dueDate) {
     const todo = await todoRepository.findById(todoId)
 
     if (!todo)
-        throw new HttpError(404, 'Todo not found')
+        throw new HttpError(404, 'todo not found')
 
     if (todo.userId != userId)
         throw new HttpError(401)
@@ -40,7 +40,7 @@ export async function deleteTodo(todoId, userId) {
     const todo = await todoRepository.findById(todoId)
 
     if (!todo)
-        throw new HttpError(404, 'Todo not found')
+        throw new HttpError(404, 'todo not found')
 
     if (todo.userId != userId)
         throw new HttpError(401)
@@ -54,7 +54,7 @@ export async function checkOrUncheckTodoById(todoId, userId, check) {
     const todo = await todoRepository.findById(todoId)
 
     if (!todo)
-        throw new HttpError(404, 'Todo not found')
+        throw new HttpError(404, 'todo not found')
 
     if (todo.userId != userId)
         throw new HttpError(401)
@@ -83,7 +83,7 @@ async function reorderTodo(todoId, userId, newPosition) {
         const todo = await todoRepository.findById(todoId, client)
 
         if (!todo)
-            throw new HttpError(404, 'Todo not found')
+            throw new HttpError(404, 'todo not found')
 
         if (todo.userId != userId)
             throw new HttpError(401)
@@ -109,17 +109,15 @@ export async function order(todoId, userId, newPosition) {
     if (!Number.isInteger(newPosition) || newPosition < 1)
         throw new HttpError(400, "'newPosition' required and should be a positive integer")
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-            return await reorderTodo(todoId, userId, newPosition)
-        } catch (error) {
-            if (error.code === '23505' && attempt === 0)
-                continue
 
-            if (error.code === '23505')
-                throw new HttpError(409, 'Habit order changed. Please try again.')
+    try {
+        return await reorderTodo(todoId, userId, newPosition)
+    } catch (error) {
 
-            throw error
-        }
+        if (error.code === '23505')
+            throw new HttpError(409, 'habit order changed. Please try again.')
+
+        throw error
     }
+
 }

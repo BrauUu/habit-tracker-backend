@@ -14,7 +14,7 @@ export async function getIncremental(incrementalId, userId) {
     const incremental = await incrementalRepository.findById(incrementalId)
 
     if (!incremental)
-        throw new HttpError(404, 'Incremental not found')
+        throw new HttpError(404, 'incremental not found')
     if (incremental.userId != userId)
         throw new HttpError(401)
 
@@ -26,7 +26,7 @@ export async function updateIncremental(incrementalId, userId, title, descriptio
     const incremental = await incrementalRepository.findById(incrementalId)
 
     if (!incremental)
-        throw new HttpError(404, 'Incremental not found')
+        throw new HttpError(404, 'incremental not found')
 
     if (incremental.userId != userId)
         throw new HttpError(401)
@@ -41,7 +41,7 @@ export async function deleteIncremental(incrementalId, userId) {
     const incremental = await incrementalRepository.findById(incrementalId)
 
     if (!incremental)
-        throw new HttpError(404, 'Incremental not found')
+        throw new HttpError(404, 'incremental not found')
 
     if (incremental.userId != userId)
         throw new HttpError(401)
@@ -55,7 +55,7 @@ export async function increaseOrDecreaseIncremental(incrementalId, userId, incre
     const incremental = await incrementalRepository.findById(incrementalId)
 
     if (!incremental)
-        throw new HttpError(404, 'Incremental not found')
+        throw new HttpError(404, 'incremental not found')
 
     if (incremental.userId != userId)
         throw new HttpError(401)
@@ -79,7 +79,7 @@ async function reorderIncremental(incrementalId, userId, newPosition) {
         const incremental = await incrementalRepository.findById(incrementalId, client)
 
         if (!incremental)
-            throw new HttpError(404, 'Incremental not found')
+            throw new HttpError(404, 'incremental not found')
 
         if (incremental.userId != userId)
             throw new HttpError(401)
@@ -113,7 +113,7 @@ export async function order(incrementalId, userId, newPosition) {
                 continue
 
             if (error.code === '23505')
-                throw new HttpError(409, 'Habit order changed. Please try again.')
+                throw new HttpError(409, 'habit order changed. Please try again.')
 
             throw error
         }
